@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "262837564579",
+    "project_id": "campaignapp-61d68",
+    "storage_bucket": "campaignapp-61d68.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:262837564579:android:da79767ce8b7f558f97b16",
+        "android_client_info": {
+          "package_name": "com.example.campaign_application"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA2px86hiZ2UgOR5i0K7AVO9ccnPQUq4JA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
