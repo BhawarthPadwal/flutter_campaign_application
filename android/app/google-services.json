@@ -12,7 +12,20 @@
           "package_name": "com.example.campaign_application"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "262837564579-qphi7jedkrsg5d1pfrtdniqbg85msn6i.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.campaign_application",
+            "certificate_hash": "a5cbd806b9d5957c359ef2f90c9eed106c02be4c"
+          }
+        },
+        {
+          "client_id": "262837564579-n4abvfl0ubqjridp285o0k16olbq29t4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyA2px86hiZ2UgOR5i0K7AVO9ccnPQUq4JA"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "262837564579-n4abvfl0ubqjridp285o0k16olbq29t4.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "262837564579-clodptpn9lm56hdeq51gi3h5bs0ho23f.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.campaignApplication"
+              }
+            }
+          ]
         }
       }
     }
