@@ -1,3 +1,4 @@
+import 'package:campaign_application/screens/profile/profile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -24,6 +25,17 @@ class _HomePageState extends State<HomePage> {
       ),
       child: Scaffold(
         backgroundColor: whiteColor,
+        appBar: AppBar(
+          title: Text('Campaigns'),
+          actions: [
+            IconButton(
+              onPressed: () {
+                Navigator.pushNamed(context, Profile.rootName);
+              },
+              icon: Icon(Icons.person),
+            ),
+          ],
+        ),
         body: SafeArea(child: Center(child: Text('Home Page'))),
       ),
     );

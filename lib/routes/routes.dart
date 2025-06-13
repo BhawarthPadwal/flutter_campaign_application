@@ -1,4 +1,5 @@
 import 'package:campaign_application/screens/home_page/home_page.dart';
+import 'package:campaign_application/screens/profile/profile.dart';
 import 'package:campaign_application/screens/splash_screen/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
@@ -17,6 +18,8 @@ class Routes {
         return getPageTransition(const SignupPage(), settings);
       case SplashScreen.rootName:
         return getPageTransition(const SplashScreen(), settings);
+      case Profile.rootName:
+          return getPageTransition(const Profile(), settings);
       default:
         MaterialPageRoute(
           builder: (_) {

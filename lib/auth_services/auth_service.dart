@@ -6,13 +6,18 @@ import 'package:firebase_auth/firebase_auth.dart';
 class AuthService {
 
   final Logger logger = Logger();
+  /// SIGN UP WITH EMAIL AND PASSWORD
 
-  Future<bool> signup({required String email, required String password}) async {
+  Future<UserCredential?> signup({
+    required String email,
+    required String password,
+  }) async {
     try {
       UserCredential userCredential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
+
       logger.i("Signup successful! User UID: ${userCredential.user?.uid}");
-      return true;
+      return userCredential;
     } on FirebaseAuthException catch (e) {
       String message;
       if (e.code == "weak-password") {
@@ -25,18 +30,20 @@ class AuthService {
         message = "An unknown error occurred.";
       }
       logger.e("Signup failed: $message");
-      return false;
+      return null;
     } catch (e) {
       logger.e("Unexpected error: $e");
-      return false;
+      return null;
     }
   }
+
+  /// SIGN IN WITH EMAIL AND PASSWORD
 
   Future<bool> signin({required String email, required String password}) async {
     try {
       UserCredential userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
-      logger.i("Signin successful! User UID: ${userCredential.user?.uid}");
+      logger.i("Logged in successfully! User UID: ${userCredential.user?.uid}");
       return true;
     } on FirebaseAuthException catch (e) {
       String message;
@@ -54,6 +61,8 @@ class AuthService {
       return false;
     }
   }
+
+  /// SIGN IN WITH GOOGLE
 
   Future<UserCredential?> signInWithGoogle() async {
     try {
@@ -78,6 +87,25 @@ class AuthService {
       print("Google Sign-In Error: $e");
       logger.e(e);
       return null;
+    }
+  }
+
+  /// SIGN OUT USER
+
+  Future<void> signOutUser() async {
+    try {
+      await FirebaseAuth.instance.signOut();
+
+      final GoogleSignIn googleSignIn = GoogleSignIn();
+      if (await googleSignIn.isSignedIn()) {
+        await googleSignIn.disconnect();
+      }
+
+      print("User signed out successfully.");
+      logger.i("User signed out successfully.");
+    } catch (e) {
+      print("Error during sign out: $e");
+      logger.e(e);
     }
   }
 }

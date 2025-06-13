@@ -29,7 +29,7 @@ class _SplashScreenState extends State<SplashScreen> {
   void navigateAfterDelay() {
     Timer(const Duration(milliseconds: 2500), () {
       Navigator.pushReplacementNamed(context, LoginPage.rootName);
-      /*final user = FirebaseAuth.instance.currentUser;
+      final user = FirebaseAuth.instance.currentUser;
 
       if (user != null) {
         // If logged in, go to home
@@ -38,7 +38,7 @@ class _SplashScreenState extends State<SplashScreen> {
       } else {
         // If not logged in, go to login
         Navigator.pushReplacementNamed(context, LoginPage.rootName);
-      }*/
+      }
     });
   }
 

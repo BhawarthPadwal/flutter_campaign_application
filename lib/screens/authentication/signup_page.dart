@@ -1,9 +1,12 @@
+import 'package:campaign_application/apis/api.dart';
+import 'package:campaign_application/apis/api_manager.dart';
 import 'package:campaign_application/auth_services/auth_service.dart';
 import 'package:campaign_application/screens/authentication/login_page.dart';
 import 'package:campaign_application/screens/home_page/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logger/logger.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../themes/theme.dart';
 
@@ -43,185 +46,251 @@ class _SignupPageState extends State<SignupPage> {
       child: Scaffold(
         // backgroundColor: blackColor,
         body: SafeArea(
-          child: Column(
-            children: [
-              heightBox(size.height * 0.2),
-              Padding(
-                padding: const EdgeInsets.all(padding10),
-                child: Text(
-                  "Let's you sign in",
-                  style: kCustomTextStyle(blackColor, padding25, true),
-                ),
-              ),
-              heightBox(padding40),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: padding20),
-                child: TextFormField(
-                  controller: _emailController,
-                  cursorColor: blackColor,
-                  autofocus: false,
-                  textInputAction: TextInputAction.next,
-                  keyboardType: TextInputType.emailAddress,
-                  style: kCustomTextStyle(blackColor, padding15, false),
-                  decoration: kInputDecoGradient("email", "eg.xxxx@gmail.com"),
-                ),
-              ),
-              heightBox(padding30),
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: padding20 * 1.2,
-                ),
-                child: TextFormField(
-                  controller: _passwordController,
-                  cursorColor: blackColor,
-                  autofocus: false,
-                  textCapitalization: TextCapitalization.sentences,
-                  textAlignVertical: TextAlignVertical.center,
-                  textInputAction: TextInputAction.go,
-                  keyboardType: TextInputType.text,
-                  obscureText: _pass1isHidden,
-                  obscuringCharacter: '*',
-                  style: kTextStyleCustomSubText(blackColor, padding14, false),
-                  decoration: kInputDecoGradientPassword(
-                    'Password',
-                    '***************',
-                    _pass1isHidden,
-                    () {
-                      setState(() {
-                        _pass1isHidden = !_pass1isHidden;
-                      });
-                    },
+          child: SingleChildScrollView(
+            physics: BouncingScrollPhysics(),
+            child: Column(
+              children: [
+                heightBox(size.height * 0.2),
+                Padding(
+                  padding: const EdgeInsets.all(padding10),
+                  child: Text(
+                    "Let's you sign in",
+                    style: kCustomTextStyle(blackColor, padding25, true),
                   ),
-                  onChanged: (value) {
-                    // handle clearing error here if needed
-                  },
-                  // validator: (value) => ...
                 ),
-              ),
-              heightBox(padding30),
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: padding20 * 1.2,
-                ),
-                child: TextFormField(
-                  controller: _confirmPasswordController,
-                  cursorColor: blackColor,
-                  autofocus: false,
-                  textCapitalization: TextCapitalization.sentences,
-                  textAlignVertical: TextAlignVertical.center,
-                  textInputAction: TextInputAction.go,
-                  keyboardType: TextInputType.text,
-                  obscureText: _pass2isHidden,
-                  obscuringCharacter: '*',
-                  style: kTextStyleCustomSubText(blackColor, padding14, false),
-                  decoration: kInputDecoGradientPassword(
-                    'Confirm Password',
-                    '***************',
-                    _pass2isHidden,
-                    () {
-                      setState(() {
-                        _pass2isHidden = !_pass2isHidden;
-                      });
-                    },
+                heightBox(padding40),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: padding20),
+                  child: TextFormField(
+                    controller: _emailController,
+                    cursorColor: blackColor,
+                    autofocus: false,
+                    textInputAction: TextInputAction.next,
+                    keyboardType: TextInputType.emailAddress,
+                    style: kCustomTextStyle(blackColor, padding15, false),
+                    decoration: kInputDecoGradient(
+                      "email",
+                      "eg.xxxx@gmail.com",
+                    ),
                   ),
-                  onChanged: (value) {
-                    // handle clearing error here if needed
-                  },
-                  // validator: (value) => ...
                 ),
-              ),
-              heightBox(padding30),
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: padding20 * 1.2,
+                heightBox(padding30),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: padding20 * 1.2,
+                  ),
+                  child: TextFormField(
+                    controller: _passwordController,
+                    cursorColor: blackColor,
+                    autofocus: false,
+                    textCapitalization: TextCapitalization.sentences,
+                    textAlignVertical: TextAlignVertical.center,
+                    textInputAction: TextInputAction.go,
+                    keyboardType: TextInputType.text,
+                    obscureText: _pass1isHidden,
+                    obscuringCharacter: '*',
+                    style: kTextStyleCustomSubText(
+                      blackColor,
+                      padding14,
+                      false,
+                    ),
+                    decoration: kInputDecoGradientPassword(
+                      'Password',
+                      '***************',
+                      _pass1isHidden,
+                      () {
+                        setState(() {
+                          _pass1isHidden = !_pass1isHidden;
+                        });
+                      },
+                    ),
+                    onChanged: (value) {
+                      // handle clearing error here if needed
+                    },
+                    // validator: (value) => ...
+                  ),
                 ),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      if (_emailController.text.isNotEmpty &&
-                          _passwordController.text.isNotEmpty &&
-                          _confirmPasswordController.text.isNotEmpty) {
-                        if (_passwordController.text ==
-                            _confirmPasswordController.text) {
-                          try {
-                            bool isSignedUp = await AuthService().signup(
-                              email: _emailController.text,
-                              password: _passwordController.text,
-                            );
-                            if (isSignedUp) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content: Text(
-                                        "Signup successful! Please log in.")),
+                heightBox(padding30),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: padding20 * 1.2,
+                  ),
+                  child: TextFormField(
+                    controller: _confirmPasswordController,
+                    cursorColor: blackColor,
+                    autofocus: false,
+                    textCapitalization: TextCapitalization.sentences,
+                    textAlignVertical: TextAlignVertical.center,
+                    textInputAction: TextInputAction.go,
+                    keyboardType: TextInputType.text,
+                    obscureText: _pass2isHidden,
+                    obscuringCharacter: '*',
+                    style: kTextStyleCustomSubText(
+                      blackColor,
+                      padding14,
+                      false,
+                    ),
+                    decoration: kInputDecoGradientPassword(
+                      'Confirm Password',
+                      '***************',
+                      _pass2isHidden,
+                      () {
+                        setState(() {
+                          _pass2isHidden = !_pass2isHidden;
+                        });
+                      },
+                    ),
+                    onChanged: (value) {
+                      // handle clearing error here if needed
+                    },
+                    // validator: (value) => ...
+                  ),
+                ),
+                heightBox(padding30),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: padding20 * 1.2,
+                  ),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        if (_emailController.text.isNotEmpty &&
+                            _passwordController.text.isNotEmpty &&
+                            _confirmPasswordController.text.isNotEmpty) {
+                          if (_passwordController.text ==
+                              _confirmPasswordController.text) {
+                            try {
+                              final userCredential = await AuthService().signup(
+                                email: _emailController.text,
+                                password: _passwordController.text,
                               );
-                              Navigator.pushReplacementNamed(
-                                  context, LoginPage.rootName);
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
+                              if (userCredential != null) {
+                                String? uid = userCredential.user?.uid;
+                                String? email = userCredential.user?.email;
+
+                                if (uid != null) {
+                                  bool exists =
+                                      await ApiManager.isUserExistsInDB(uid);
+
+                                  if (!exists) {
+                                    // Create user if not found
+                                    await ApiManager.post(
+                                      AppReqEndPoint.createUser(),
+                                      {"userId": uid, "emailId": email},
+                                    );
+                                    logger.i("User created in DB.");
+                                  } else {
+                                    logger.i("User already exists in DB.");
+                                  }
+
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text("Logged in successfully!"),
+                                    ),
+                                  );
+
+                                  Navigator.pushReplacementNamed(
+                                    context,
+                                    LoginPage.rootName,
+                                  );
+                                } else {
+                                  logger.e("Firebase UID is null.");
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text("User ID not found."),
+                                    ),
+                                  );
+                                }
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
                                     content: Text(
-                                        "Signup failed. Please try again.")),
+                                      "Signup successful! Please log in.",
+                                    ),
+                                  ),
+                                );
+                                Navigator.pushReplacementNamed(
+                                  context,
+                                  LoginPage.rootName,
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      "Signup failed. Please try again.",
+                                    ),
+                                  ),
+                                );
+                              }
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text("Error: ${e.toString()}"),
+                                ),
                               );
                             }
-                          } catch (e) {
+                          } else {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                  content: Text("Error: ${e.toString()}")),
+                              const SnackBar(
+                                content: Text(
+                                  "Password does not matched. Kindly re-enter confirm password",
+                                ),
+                              ),
                             );
                           }
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text(
-                                      "Password does not matched. Kindly re-enter confirm password")));
-                        }
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                                content: Text("Kindly enter all fields!")));
-                      }
-                      // Navigator.pushReplacementNamed(context, LoginScreen.rootName);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: blackColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                              content: Text("Kindly enter all fields!"),
+                            ),
+                          );
+                        }
+                        // Navigator.pushReplacementNamed(context, LoginScreen.rootName);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: blackColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
-                    ),
-                    child: Text(
-                      'Sign in',
-                      style: kCustomTextStyle(Colors.white, padding18, true),
+                      child: Text(
+                        'Sign in',
+                        style: kCustomTextStyle(Colors.white, padding18, true),
+                      ),
                     ),
                   ),
                 ),
-              ),
-              heightBox(padding20),
-              GestureDetector(
-                onTap: () {
-                  Navigator.pushReplacementNamed(context, LoginPage.rootName);
-                },
-                child: Text("Already have an account. Kindly login here."),
-              ),
-              heightBox(padding20),
-              ElevatedButton(
-                onPressed: () async {
-                  final userCredential = await AuthService().signInWithGoogle();
-                  if (userCredential != null) {
-                    // User signed in successfully
-                    print('Signed in: ${userCredential.user!.email}');
-                    logger.i('Signed in: ${userCredential.user!.email}');
-                    Navigator.pushReplacementNamed(context, HomePage.rootName);
-                  } else {
-                    // Sign-in failed or was canceled
-                    print('Sign-in cancelled or failed');
-                    logger.e('Sign-in cancelled or failed');
-                  }
-                },
-                child: Text("Sign in with Google"),
-              ),
-            ],
+                heightBox(padding20),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pushReplacementNamed(context, LoginPage.rootName);
+                  },
+                  child: Text("Already have an account. Kindly login here."),
+                ),
+                heightBox(padding20),
+                ElevatedButton(
+                  onPressed: () async {
+                    final userCredential =
+                        await AuthService().signInWithGoogle();
+                    if (userCredential != null) {
+                      // User signed in successfully
+                      print('Signed in: ${userCredential.user!.email}');
+                      logger.i('Signed in: ${userCredential.user!.email}');
+                      Navigator.pushReplacementNamed(
+                        context,
+                        HomePage.rootName,
+                      );
+                    } else {
+                      // Sign-in failed or was canceled
+                      print('Sign-in cancelled or failed');
+                      logger.e('Sign-in cancelled or failed');
+                    }
+                  },
+                  child: Text("Sign in with Google"),
+                ),
+              ],
+            ),
           ),
         ),
       ),

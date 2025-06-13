@@ -1,3 +1,4 @@
+import 'package:campaign_application/apis/api_manager.dart';
 import 'package:campaign_application/screens/authentication/signup_page.dart';
 import 'package:campaign_application/screens/home_page/home_page.dart';
 import 'package:campaign_application/themes/theme.dart';
@@ -5,6 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logger/logger.dart';
 import 'package:campaign_application/auth_services/auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+import '../../apis/app_req.dart';
 
 class LoginPage extends StatefulWidget {
   static const String rootName = 'loginPage';
@@ -55,7 +59,10 @@ class _LoginPageState extends State<LoginPage> {
                     textInputAction: TextInputAction.next,
                     keyboardType: TextInputType.emailAddress,
                     style: kCustomTextStyle(blackColor, padding15, false),
-                    decoration: kInputDecoGradient("email", "eg.xxxx@gmail.com"),
+                    decoration: kInputDecoGradient(
+                      "email",
+                      "eg.xxxx@gmail.com",
+                    ),
                   ),
                 ),
                 heightBox(padding30),
@@ -73,7 +80,11 @@ class _LoginPageState extends State<LoginPage> {
                     keyboardType: TextInputType.text,
                     obscureText: _isHidden,
                     obscuringCharacter: '*',
-                    style: kTextStyleCustomSubText(blackColor, padding14, false),
+                    style: kTextStyleCustomSubText(
+                      blackColor,
+                      padding14,
+                      false,
+                    ),
                     decoration: kInputDecoGradientPassword(
                       'Password',
                       '***************',
@@ -104,21 +115,114 @@ class _LoginPageState extends State<LoginPage> {
                             _passwordController.text.isNotEmpty) {
                           try {
                             bool isSignedIn = await AuthService().signin(
+                              email: _emailController.text.trim(),
+                              password: _passwordController.text.trim(),
+                            );
+
+                            if (isSignedIn) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text("Logged in successfully!"),
+                                ),
+                              );
+                              Navigator.pushReplacementNamed(
+                                context,
+                                HomePage.rootName,
+                              );
+                              /*String? uid =
+                                    FirebaseAuth.instance.currentUser?.uid;
+
+                                if (uid != null) {
+                                  bool exists = await isUserExistsInDB(uid);
+
+                                  if (!exists) {
+                                    // Create user if not found
+                                    await ApiManager.post(
+                                      AppReqEndPoint.createUser(),
+                                      {
+                                        "userId": uid,
+                                        "emailId":
+                                            _emailController.text.toString(),
+                                      },
+                                    );
+                                    logger.i("User created in DB.");
+                                  } else {
+                                    logger.i("User already exists in DB.");
+                                  }
+
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text("Logged in successfully!"),
+                                    ),
+                                  );
+
+                                  Navigator.pushReplacementNamed(
+                                    context,
+                                    HomePage.rootName,
+                                  );
+                                } else {
+                                  logger.e("Firebase UID is null.");
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text("User ID not found."),
+                                    ),
+                                  );
+                                }*/
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    "Signin failed. Please try again.",
+                                  ),
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            logger.e("Login error: $e");
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text("Error: ${e.toString()}")),
+                            );
+                          }
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("Kindly enter all fields!"),
+                            ),
+                          );
+                        }
+                      },
+                      /*if (_emailController.text.isNotEmpty &&
+                            _passwordController.text.isNotEmpty) {
+                          try {
+                            bool isSignedIn = await AuthService().signin(
                               email: _emailController.text,
                               password: _passwordController.text,
                             );
                             if (isSignedIn) {
+                              String? uid =
+                                  FirebaseAuth.instance.currentUser?.uid;
+                              await isUserExistsInDB == true ?
+                               : ;
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                    content: Text("Logged in successfully!")),
+                                  content: Text("Logged in successfully!"),
+                                ),
                               );
+                              ApiManager.post(AppReqEndPoint.createUser(), {
+                                "userId": uid,
+                                "emailId": _emailController.text.toString(),
+                              });
                               Navigator.pushReplacementNamed(
-                                  context, HomePage.rootName);
+                                context,
+                                HomePage.rootName,
+                              );
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                    content: Text(
-                                        "Signin failed. Please try again.")),
+                                  content: Text(
+                                    "Signin failed. Please try again.",
+                                  ),
+                                ),
                               );
                             }
                           } catch (e) {
@@ -128,11 +232,12 @@ class _LoginPageState extends State<LoginPage> {
                           }
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text("Kindly enter all fields!")));
-                        }
-                        //Navigator.pushReplacementNamed(context, SportOptions.rootName);
-                      },
+                            const SnackBar(
+                              content: Text("Kindly enter all fields!"),
+                            ),
+                          );
+                        }*/
+                      //Navigator.pushReplacementNamed(context, SportOptions.rootName);
                       style: ElevatedButton.styleFrom(
                         backgroundColor: blackColor,
                         shape: RoundedRectangleBorder(
@@ -156,12 +261,16 @@ class _LoginPageState extends State<LoginPage> {
                 heightBox(padding20),
                 ElevatedButton(
                   onPressed: () async {
-                    final userCredential = await AuthService().signInWithGoogle();
+                    final userCredential =
+                        await AuthService().signInWithGoogle();
                     if (userCredential != null) {
                       // User signed in successfully
                       print('Logged in: ${userCredential.user!.email}');
                       logger.i('Logged in: ${userCredential.user!.email}');
-                      Navigator.pushReplacementNamed(context, HomePage.rootName);
+                      Navigator.pushReplacementNamed(
+                        context,
+                        HomePage.rootName,
+                      );
                       // Navigate to home or another page
                     } else {
                       // Sign-in failed or was canceled
@@ -179,3 +288,17 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
+
+/*Future<bool> isUserExistsInDB(String uid) async {
+  try {
+    final response = await ApiManager.get(AppReqEndPoint.getUserById(uid));
+    if (response['status'] == 200) {
+      return true;
+    } else if (response['status'] == 404) {
+      return false;
+    }
+  } catch (e) {
+    print(e);
+  }
+  return false;
+}*/
