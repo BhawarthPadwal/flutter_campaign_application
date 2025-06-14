@@ -10,5 +10,8 @@ class AppReqEndPoint {
     return '${AppEnv.getAppEnvironment()}/users/$id'; // add id here
   }
 
+  static getCampaigns() {
+    return '${AppEnv.getAppEnvironment()}/campaigns';
+  }
 
 }
