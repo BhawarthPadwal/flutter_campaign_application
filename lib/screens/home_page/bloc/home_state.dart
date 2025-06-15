@@ -23,6 +23,14 @@ final class HomeErrorState extends HomeState {
 
 final class NavigatingProfilePageState extends HomeActionableState {}
 
+final class NewCampaignCreatedState extends HomeState {}
+
+final class NewCampaignCreationFailedState extends HomeState {
+  final String errorMessage;
+  NewCampaignCreationFailedState(this.errorMessage);
+}
+
+
 
 
 

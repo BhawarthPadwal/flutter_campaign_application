@@ -3,8 +3,9 @@ import 'package:campaign_application/screens/profile/profile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../themes/theme.dart';
+import '../home_page/widget/campaign_dialog.dart';
 
 class HomePage extends StatefulWidget {
   static const String rootName = 'homePage';
@@ -17,6 +18,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   HomeBloc homeBloc = HomeBloc();
+  String searchQuery = '';
 
   @override
   void initState() {
@@ -45,23 +47,111 @@ class _HomePageState extends State<HomePage> {
           ),
           child: Scaffold(
             backgroundColor: whiteColor,
+            floatingActionButton: FloatingActionButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder:
+                      (_) => CampaignDialog(
+                        homeBloc,
+                        FirebaseAuth.instance.currentUser!.uid,
+                      ),
+                );
+              },
+              backgroundColor: Colors.grey,
+              tooltip: 'Add Campaign', // Or your app's primary color
+              child: Icon(Icons.add, color: blackColor),
+            ),
             body: SafeArea(
               child: Column(
                 children: [
-                  Row(
-                    children: [
-                      Text('Campaigns'),
-                      Spacer(),
-                      IconButton(
-                        onPressed: () {
-                          homeBloc.add(NavigateToProfilePageEvent());
-                        },
-                        icon: Icon(Icons.person),
-                      ),
-                    ],
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: padding10,
+                      vertical: padding10,
+                    ),
+                    child: Row(
+                      children: [
+                        Text(
+                          'Campaigns',
+                          style: TextStyle(fontSize: padding20),
+                        ),
+                        Spacer(),
+                        IconButton(
+                          onPressed: () {
+                            homeBloc.add(NavigateToProfilePageEvent());
+                          },
+                          icon: Icon(Icons.person),
+                        ),
+                      ],
+                    ),
                   ),
-                  SingleChildScrollView(
-                    physics: BouncingScrollPhysics(),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: padding10,
+                      vertical: padding5,
+                    ),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: size.width * 0.825,
+                          child: TextField(
+                            onChanged: (value) {
+                              searchQuery = value;
+                              homeBloc.add(
+                                FetchSearchedCampaignsEvent(searchQuery),
+                              );
+                            },
+                            decoration: InputDecoration(
+                              hintText: 'Search campaigns...',
+                              prefixIcon: Icon(Icons.search),
+                              fillColor: blueGreyColor,
+                              // border: OutlineInputBorder(
+                              //   borderRadius: BorderRadius.circular(10),
+                              // ),
+                              contentPadding: EdgeInsets.symmetric(
+                                vertical: 10,
+                                horizontal: 16,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: SizedBox(
+                            child: PopupMenuButton<String>(
+                              icon: Image.asset(
+                                'assets/icons/ic_filter.png',
+                                width: padding25,
+                                height: padding25,
+                              ),
+                              onSelected: (String selectedSort) {
+                                homeBloc.add(
+                                  FetchSortedCampaignsEvents(selectedSort),
+                                );
+                              },
+                              itemBuilder:
+                                  (BuildContext context) =>
+                                      <PopupMenuEntry<String>>[
+                                        const PopupMenuItem<String>(
+                                          value: 'recent',
+                                          child: Text('Recent'),
+                                        ),
+                                        const PopupMenuItem<String>(
+                                          value: 'top-rated',
+                                          child: Text('Top Rated'),
+                                        ),
+                                        const PopupMenuItem<String>(
+                                          value: 'a-z',
+                                          child: Text('A-Z'),
+                                        ),
+                                      ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
                     child: Padding(
                       padding: EdgeInsets.symmetric(
                         horizontal: padding10,
@@ -71,29 +161,33 @@ class _HomePageState extends State<HomePage> {
                           state is HomeLoadingState
                               ? Center(child: CircularProgressIndicator())
                               : state is HomeDataLoadedState
-                              ? ListView.builder(
-                                shrinkWrap: true,
-                                itemCount: state.campaigns.length,
-                                itemBuilder: (context, index) {
-                                  final campaign = state.campaigns[index];
-                                  return Card(
-                                    child: ListTile(
-                                      title: Text(campaign.name),
-                                      subtitle: Text(campaign.description),
-                                      trailing: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Text('👍 ${campaign.votes.upvotes}'),
-                                          Text(
-                                            '👎 ${campaign.votes.downvotes}',
+                              ? state.campaigns.isEmpty
+                                  ? Center(child: Text("No campaigns found"))
+                                  : ListView.builder(
+                                    shrinkWrap: true,
+                                    itemCount: state.campaigns.length,
+                                    itemBuilder: (context, index) {
+                                      final campaign = state.campaigns[index];
+                                      return Card(
+                                        child: ListTile(
+                                          title: Text(campaign.name),
+                                          subtitle: Text(campaign.description),
+                                          trailing: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Text(
+                                                '👍 ${campaign.votes.upvotes}',
+                                              ),
+                                              Text(
+                                                '👎 ${campaign.votes.downvotes}',
+                                              ),
+                                            ],
                                           ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                },
-                              )
+                                        ),
+                                      );
+                                    },
+                                  )
                               : state is HomeErrorState
                               ? Center(child: Text(state.errorMessage))
                               : Center(child: Text("No campaigns found")),
