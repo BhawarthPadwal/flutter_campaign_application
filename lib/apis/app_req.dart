@@ -1,7 +1,6 @@
 import 'package:campaign_application/apis/api.dart';
 
 class AppReqEndPoint {
-
   /// GET USERS FROM API
   static createUser() {
     return '${AppEnv.getAppEnvironment()}/users';
@@ -25,5 +24,10 @@ class AppReqEndPoint {
   /// CREATE NEW CAMPAIGN
   static createCampaign() {
     return '${AppEnv.getAppEnvironment()}/campaigns';
+  }
+
+  /// GET CAMPAIGNS BY USER ID
+  static getCampaignByUserId(String id) {
+    return '${AppEnv.getAppEnvironment()}/campaigns/user/$id';
   }
 }

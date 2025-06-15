@@ -4,7 +4,6 @@ import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 
 class ApiManager {
-
   // POST REQUEST
   static Future<Map<String, dynamic>> post(
     String endPoints,
@@ -62,6 +61,30 @@ class ApiManager {
     return responseData;
   }
 
+  static Future<List<dynamic>> getList(String endPoint) async {
+    Logger logger = Logger();
+    try {
+      final response = await http.get(
+        Uri.parse(endPoint),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> responseData = json.decode(
+          response.body,
+        ); // ✅ decode directly
+        logger.i({'status': response.statusCode, 'data': responseData});
+        return responseData;
+      } else {
+        logger.e({'status': response.statusCode, 'data': response.body});
+        throw Exception('Failed with status: ${response.statusCode}');
+      }
+    } catch (e) {
+      logger.e(e);
+      rethrow; // Let caller handle error
+    }
+  }
+
   /// FOR CHECKING IF USER EXISTS IN POSTGRES DB
 
   static Future<bool> isUserExistsInDB(String uid) async {
@@ -77,5 +100,4 @@ class ApiManager {
     }
     return false;
   }
-
 }

@@ -19,7 +19,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   String _query = '';
   String _sort = 'recent';
 
-
   HomeBloc() : super(HomeInitialState()) {
     on<FetchCampaignsEvent>(fetchCampaignsEvent);
     on<NavigateToProfilePageEvent>(navigateToProfilePageEvent);
@@ -29,44 +28,10 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<FetchNextPageEvent>(fetchNextPageEvent);
   }
 
-  /*Future<void> fetchCampaignsEvent(
+  Future<void> fetchCampaignsEvent(
     FetchCampaignsEvent event,
     Emitter<HomeState> emit,
   ) async {
-    emit(HomeLoadingState());
-    await Future.delayed(const Duration(seconds: 2));
-    try {
-      final result = await ApiManager.get(AppReqEndPoint.getCampaigns());
-      if (result['status'] == 200) {
-        final response = result['data'];
-        final Campaigns campaigns = campaignsFromJson(response);
-        final List<Data> dataList = campaigns.data;
-        logger.d(dataList);
-        emit(HomeDataLoadedState(dataList));
-      } else {
-        emit(HomeErrorState(result['data'].toString()));
-      }
-    } catch (e) {
-      emit(HomeErrorState(e.toString()));
-    }
-  }*/
-
-  /*Future<void> fetchCampaignsEvent(
-    FetchCampaignsEvent event,
-    Emitter<HomeState> emit,
-  ) async {
-    emit(HomeLoadingState());
-    await Future.delayed(const Duration(seconds: 2));
-    try {
-      final dataList = await _fetchAndParseCampaigns();
-      logger.d(dataList);
-      emit(HomeDataLoadedState(dataList));
-    } catch (e) {
-      emit(HomeErrorState(e.toString()));
-    }
-  }*/
-
-  Future<void> fetchCampaignsEvent(FetchCampaignsEvent event, Emitter<HomeState> emit) async {
     emit(HomeLoadingState());
     _mode = 'default';
     _query = '';
@@ -83,7 +48,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     }
   }
 
-
   FutureOr<void> navigateToProfilePageEvent(
     NavigateToProfilePageEvent event,
     Emitter<HomeState> emit,
@@ -91,7 +55,10 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     emit(NavigatingProfilePageState());
   }
 
-  Future<void> fetchSortedCampaignsEvents(FetchSortedCampaignsEvents event, Emitter<HomeState> emit) async {
+  Future<void> fetchSortedCampaignsEvents(
+    FetchSortedCampaignsEvents event,
+    Emitter<HomeState> emit,
+  ) async {
     emit(HomeLoadingState());
     _mode = 'sort';
     _sort = event.sort;
@@ -99,7 +66,10 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     _allCampaigns.clear();
 
     try {
-      final dataList = await _fetchAndParseCampaigns(sort: _sort, page: _currentPage);
+      final dataList = await _fetchAndParseCampaigns(
+        sort: _sort,
+        page: _currentPage,
+      );
       _allCampaigns = dataList;
       emit(HomeDataLoadedState(List.from(_allCampaigns)));
     } catch (e) {
@@ -107,37 +77,10 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     }
   }
 
-  /*FutureOr<void> fetchSortedCampaignsEvents(
-    FetchSortedCampaignsEvents event,
-    Emitter<HomeState> emit,
-  ) async {
-    emit(HomeLoadingState());
-    await Future.delayed(const Duration(seconds: 1));
-    try {
-      final dataList = await _fetchAndParseCampaigns(sort: event.sort);
-      logger.d(dataList);
-      emit(HomeDataLoadedState(dataList));
-    } catch (e) {
-      emit(HomeErrorState(e.toString()));
-    }
-  }*/
-
-  /*FutureOr<void> fetchSearchedCampaignsEvent(
+  Future<void> fetchSearchedCampaignsEvent(
     FetchSearchedCampaignsEvent event,
     Emitter<HomeState> emit,
   ) async {
-    emit(HomeLoadingState());
-    await Future.delayed(const Duration(seconds: 1));
-    try {
-      final dataList = await _fetchAndParseCampaigns(query: event.query);
-      logger.d(dataList);
-      emit(HomeDataLoadedState(dataList));
-    } catch (e) {
-      emit(HomeErrorState(e.toString()));
-    }
-  }*/
-
-  Future<void> fetchSearchedCampaignsEvent(FetchSearchedCampaignsEvent event, Emitter<HomeState> emit) async {
     emit(HomeLoadingState());
     _mode = 'search';
     _query = event.query;
@@ -145,7 +88,10 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     _allCampaigns.clear();
 
     try {
-      final dataList = await _fetchAndParseCampaigns(query: _query, page: _currentPage);
+      final dataList = await _fetchAndParseCampaigns(
+        query: _query,
+        page: _currentPage,
+      );
       _allCampaigns = dataList;
       emit(HomeDataLoadedState(List.from(_allCampaigns)));
     } catch (e) {
@@ -153,24 +99,16 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     }
   }
 
-  /*FutureOr<void> fetchNextPageEvent(FetchNextPageEvent event, Emitter<HomeState> emit) async {
-    emit(HomeLoadingState());
-    await Future.delayed(const Duration(seconds: 1));
-    try {
-      final dataList = await _fetchAndParseCampaigns(page: event.page);
-      logger.d(dataList);
-      emit(HomeDataLoadedState(dataList));
-    } catch (e) {
-      emit(HomeErrorState(e.toString()));
-    }
-  }*/
-  FutureOr<void> fetchNextPageEvent(FetchNextPageEvent event, Emitter<HomeState> emit) async {
-    // Emit nothing for pagination loading — avoid spinner in the middle
+  FutureOr<void> fetchNextPageEvent(
+    FetchNextPageEvent event,
+    Emitter<HomeState> emit,
+  ) async {
     try {
       final newData = await _fetchAndParseCampaigns(page: event.page);
       final currentState = state;
       if (currentState is HomeDataLoadedState) {
-        final updatedList = List<Data>.from(currentState.campaigns)..addAll(newData);
+        final updatedList = List<Data>.from(currentState.campaigns)
+          ..addAll(newData);
         emit(HomeDataLoadedState(updatedList, isPagination: true));
       } else {
         emit(HomeDataLoadedState(newData)); // If first page is loaded
@@ -179,10 +117,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       emit(HomeErrorState(e.toString()));
     }
   }
-
-
-
-
 
   Future<List<Data>> _fetchAndParseCampaigns({
     String sort = 'recent',
@@ -218,6 +152,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       logger.d(result);
       if (result['status'] == 201 || result['status'] == 200) {
         emit(NewCampaignCreatedState());
+
         /// FOR RE-FETCHING CAMPAIGNS
         add(FetchCampaignsEvent());
       } else {
@@ -227,20 +162,4 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       emit(NewCampaignCreationFailedState(e.toString()));
     }
   }
-
-
 }
-
-// Future<List<Data>> _fetchAndParseCampaigns({String sort = 'recent', String query = '', int page = 1}) async {
-//   final result = await ApiManager.get(
-//     AppReqEndPoint.getCampaigns(sort: sort, query: query, page: page),
-//   );
-//
-//   if (result['status'] == 200) {
-//     final response = result['data'];
-//     final Campaigns campaigns = campaignsFromJson(response);
-//     return campaigns.data;
-//   } else {
-//     throw Exception(result['data'].toString());
-//   }
-// }

@@ -1,7 +1,9 @@
 import 'package:campaign_application/screens/authentication/login_page.dart';
+import 'package:campaign_application/screens/profile/bloc/profile_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../auth_services/auth_service.dart';
 import '../../themes/theme.dart';
 
@@ -15,34 +17,125 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
+  ProfileBloc profileBloc = ProfileBloc();
+
+  @override
+  void initState() {
+    super.initState();
+    final userId = FirebaseAuth.instance.currentUser!.uid;
+    profileBloc.add(FetchUserCampaignsEvent(userId));
+  }
+
   @override
   Widget build(BuildContext context) {
-    return AnnotatedRegion(
-      value: SystemUiOverlayStyle(
-        statusBarBrightness: Brightness.light,
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.dark,
-      ),
-      child: Scaffold(
-        backgroundColor: whiteColor,
-        appBar: AppBar(
-          title: Text('Profile'),
-          actions: [
-            IconButton(
-              onPressed: () {
-                AuthService().signOutUser();
-                Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  LoginPage.rootName,
-                  (route) => false,
-                );
-              },
-              icon: Icon(Icons.logout),
+    return BlocConsumer<ProfileBloc, ProfileState>(
+      bloc: profileBloc,
+      listenWhen: (previous, current) => current is ProfileActionableState,
+      buildWhen: (previous, current) => current is! ProfileActionableState,
+      listener: (context, state) {
+        // TODO: implement listener
+      },
+      builder: (context, state) {
+        return AnnotatedRegion(
+          value: SystemUiOverlayStyle(
+            statusBarBrightness: Brightness.light,
+            statusBarColor: Colors.transparent,
+            statusBarIconBrightness: Brightness.dark,
+          ),
+          child: Scaffold(
+            backgroundColor: whiteColor,
+            body: SafeArea(
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: padding10,
+                      vertical: padding10,
+                    ),
+                    child: Row(
+                      children: [
+                        Text('Profile', style: TextStyle(fontSize: padding20)),
+                        Spacer(),
+                        IconButton(
+                          onPressed: () {
+                            AuthService().signOutUser();
+                            Navigator.pushNamedAndRemoveUntil(
+                              context,
+                              LoginPage.rootName,
+                              (route) => false,
+                            );
+                          },
+                          icon: Icon(Icons.logout),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: padding10,
+                      vertical: padding10,
+                    ),
+                    child: Text(
+                      FirebaseAuth.instance.currentUser!.email.toString(),
+                    ),
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: padding10,
+                        vertical: padding10,
+                      ),
+                      child: Builder(
+                        builder: (_) {
+                          if (state is ProfileDataLoadingState) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          } else if (state is ProfileDataLoadedState) {
+                            final campaigns = state.campaigns;
+                            if (campaigns.isEmpty) {
+                              return const Center(
+                                child: Text("No campaigns found"),
+                              );
+                            }
+                            return ListView.builder(
+                              itemCount: campaigns.length,
+                              physics: const BouncingScrollPhysics(),
+                              itemBuilder: (context, index) {
+                                final campaign = campaigns[index];
+                                return Card(
+                                  child: ListTile(
+                                    title: Text(campaign.name),
+                                    subtitle: Text(campaign.description),
+                                    trailing: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Text('👍 ${campaign.votes.upvotes}'),
+                                        Text('👎 ${campaign.votes.downvotes}'),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
+                          } else if (state is ProfileDataErrorState) {
+                            return Center(child: Text(state.error));
+                          } else {
+                            return const Center(
+                              child: Text("No campaigns found"),
+                            );
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ],
-        ),
-        body: SafeArea(child: Center(child: Text('Profile Page'))),
-      ),
+          ),
+        );
+      },
     );
   }
 }
