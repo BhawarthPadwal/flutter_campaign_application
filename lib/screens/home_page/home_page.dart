@@ -20,11 +20,35 @@ class _HomePageState extends State<HomePage> {
   HomeBloc homeBloc = HomeBloc();
   String searchQuery = '';
 
+  late ScrollController _scrollController;
+  int _currentPage = 1;
+  bool _isFetchingMore = false;
+
+
   @override
   void initState() {
     super.initState();
     homeBloc.add(FetchCampaignsEvent());
+
+    _scrollController = ScrollController();
+    _scrollController.addListener(_onScroll);
   }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200 &&
+        !_isFetchingMore) {
+      _isFetchingMore = true;
+      _currentPage++;
+      homeBloc.add(FetchNextPageEvent(_currentPage));
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -157,6 +181,53 @@ class _HomePageState extends State<HomePage> {
                         horizontal: padding10,
                         vertical: padding10,
                       ),
+                      child: state is HomeLoadingState
+                          ? Center(child: CircularProgressIndicator())
+                          : state is HomeDataLoadedState
+                          ? Builder(
+                        builder: (_) {
+                          // ✅ Reset pagination flag when data is loaded via pagination
+                          if (state.isPagination) {
+                            _isFetchingMore = false;
+                          }
+
+                          return state.campaigns.isEmpty
+                              ? Center(child: Text("No campaigns found"))
+                              : ListView.builder(
+                            controller: _scrollController,
+                            shrinkWrap: true,
+                            itemCount: state.campaigns.length,
+                            itemBuilder: (context, index) {
+                              final campaign = state.campaigns[index];
+                              return Card(
+                                child: ListTile(
+                                  title: Text(campaign.name),
+                                  subtitle: Text(campaign.description),
+                                  trailing: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text('👍 ${campaign.votes.upvotes}'),
+                                      Text('👎 ${campaign.votes.downvotes}'),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      )
+                          : state is HomeErrorState
+                          ? Center(child: Text(state.errorMessage))
+                          : Center(child: Text("No campaigns found")),
+                    ),
+                  ),
+
+                  /*Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: padding10,
+                        vertical: padding10,
+                      ),
                       child:
                           state is HomeLoadingState
                               ? Center(child: CircularProgressIndicator())
@@ -192,7 +263,7 @@ class _HomePageState extends State<HomePage> {
                               ? Center(child: Text(state.errorMessage))
                               : Center(child: Text("No campaigns found")),
                     ),
-                  ),
+                  ),*/
                 ],
               ),
             ),

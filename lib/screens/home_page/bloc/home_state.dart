@@ -13,7 +13,8 @@ final class HomeLoadingState extends HomeState {}
 
 final class HomeDataLoadedState extends HomeState {
   final List<Data> campaigns;
-  HomeDataLoadedState(this.campaigns);
+  final bool isPagination;
+  HomeDataLoadedState(this.campaigns, {this.isPagination = false});
 }
 
 final class HomeErrorState extends HomeState {

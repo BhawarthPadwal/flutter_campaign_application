@@ -20,7 +20,7 @@ class FetchSortedCampaignsEvents extends HomeEvent {
 }
 
 class FetchNextPageEvent extends HomeEvent {
-  final page;
+  final int page;
   FetchNextPageEvent(this.page);
 }
 

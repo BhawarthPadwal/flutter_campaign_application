@@ -13,6 +13,12 @@ part 'home_state.dart';
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
   Logger logger = Logger();
+  List<Data> _allCampaigns = [];
+  int _currentPage = 1;
+  String _mode = 'default'; // 'default', 'search', 'sort'
+  String _query = '';
+  String _sort = 'recent';
+
 
   HomeBloc() : super(HomeInitialState()) {
     on<FetchCampaignsEvent>(fetchCampaignsEvent);
@@ -45,7 +51,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     }
   }*/
 
-  Future<void> fetchCampaignsEvent(
+  /*Future<void> fetchCampaignsEvent(
     FetchCampaignsEvent event,
     Emitter<HomeState> emit,
   ) async {
@@ -58,7 +64,25 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     } catch (e) {
       emit(HomeErrorState(e.toString()));
     }
+  }*/
+
+  Future<void> fetchCampaignsEvent(FetchCampaignsEvent event, Emitter<HomeState> emit) async {
+    emit(HomeLoadingState());
+    _mode = 'default';
+    _query = '';
+    _sort = 'recent';
+    _currentPage = 1;
+    _allCampaigns.clear();
+
+    try {
+      final dataList = await _fetchAndParseCampaigns(page: _currentPage);
+      _allCampaigns = dataList;
+      emit(HomeDataLoadedState(List.from(_allCampaigns)));
+    } catch (e) {
+      emit(HomeErrorState(e.toString()));
+    }
   }
+
 
   FutureOr<void> navigateToProfilePageEvent(
     NavigateToProfilePageEvent event,
@@ -67,7 +91,23 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     emit(NavigatingProfilePageState());
   }
 
-  FutureOr<void> fetchSortedCampaignsEvents(
+  Future<void> fetchSortedCampaignsEvents(FetchSortedCampaignsEvents event, Emitter<HomeState> emit) async {
+    emit(HomeLoadingState());
+    _mode = 'sort';
+    _sort = event.sort;
+    _currentPage = 1;
+    _allCampaigns.clear();
+
+    try {
+      final dataList = await _fetchAndParseCampaigns(sort: _sort, page: _currentPage);
+      _allCampaigns = dataList;
+      emit(HomeDataLoadedState(List.from(_allCampaigns)));
+    } catch (e) {
+      emit(HomeErrorState(e.toString()));
+    }
+  }
+
+  /*FutureOr<void> fetchSortedCampaignsEvents(
     FetchSortedCampaignsEvents event,
     Emitter<HomeState> emit,
   ) async {
@@ -80,9 +120,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     } catch (e) {
       emit(HomeErrorState(e.toString()));
     }
-  }
+  }*/
 
-  FutureOr<void> fetchSearchedCampaignsEvent(
+  /*FutureOr<void> fetchSearchedCampaignsEvent(
     FetchSearchedCampaignsEvent event,
     Emitter<HomeState> emit,
   ) async {
@@ -95,8 +135,25 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     } catch (e) {
       emit(HomeErrorState(e.toString()));
     }
+  }*/
+
+  Future<void> fetchSearchedCampaignsEvent(FetchSearchedCampaignsEvent event, Emitter<HomeState> emit) async {
+    emit(HomeLoadingState());
+    _mode = 'search';
+    _query = event.query;
+    _currentPage = 1;
+    _allCampaigns.clear();
+
+    try {
+      final dataList = await _fetchAndParseCampaigns(query: _query, page: _currentPage);
+      _allCampaigns = dataList;
+      emit(HomeDataLoadedState(List.from(_allCampaigns)));
+    } catch (e) {
+      emit(HomeErrorState(e.toString()));
+    }
   }
-  FutureOr<void> fetchNextPageEvent(FetchNextPageEvent event, Emitter<HomeState> emit) async {
+
+  /*FutureOr<void> fetchNextPageEvent(FetchNextPageEvent event, Emitter<HomeState> emit) async {
     emit(HomeLoadingState());
     await Future.delayed(const Duration(seconds: 1));
     try {
@@ -106,7 +163,24 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     } catch (e) {
       emit(HomeErrorState(e.toString()));
     }
+  }*/
+  FutureOr<void> fetchNextPageEvent(FetchNextPageEvent event, Emitter<HomeState> emit) async {
+    // Emit nothing for pagination loading — avoid spinner in the middle
+    try {
+      final newData = await _fetchAndParseCampaigns(page: event.page);
+      final currentState = state;
+      if (currentState is HomeDataLoadedState) {
+        final updatedList = List<Data>.from(currentState.campaigns)..addAll(newData);
+        emit(HomeDataLoadedState(updatedList, isPagination: true));
+      } else {
+        emit(HomeDataLoadedState(newData)); // If first page is loaded
+      }
+    } catch (e) {
+      emit(HomeErrorState(e.toString()));
+    }
   }
+
+
 
 
 
