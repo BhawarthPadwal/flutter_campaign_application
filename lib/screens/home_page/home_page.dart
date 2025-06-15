@@ -132,10 +132,17 @@ class _HomePageState extends State<HomePage> {
                                 FetchSearchedCampaignsEvent(searchQuery),
                               );
                             },
+                            cursorColor: Colors.black,
                             decoration: InputDecoration(
                               hintText: 'Search campaigns...',
                               prefixIcon: Icon(Icons.search),
                               fillColor: blueGreyColor,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide:
+                                    BorderSide
+                                        .none, // <- this removes underline
+                              ),
                               // border: OutlineInputBorder(
                               //   borderRadius: BorderRadius.circular(10),
                               // ),

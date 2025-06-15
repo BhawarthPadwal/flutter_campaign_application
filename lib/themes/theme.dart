@@ -55,76 +55,59 @@ TextStyle kTextStyleCustomSubText(
   );
 }
 
-InputDecoration kInputDecoGradient(String labelText, String hintText) {
+InputDecoration kInputDecoGradient(String label, String hint) {
   return InputDecoration(
-    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 18),
-    labelText: labelText,
-    filled: true,
-    hintText: hintText,
-    hintStyle: kCustomTextStyle(Colors.blueGrey, padding15, false),
-    counterText: "",
-    labelStyle: kCustomTextStyle(blackColor, padding15, false),
-    fillColor: textFieldBgColor,
-    floatingLabelBehavior: FloatingLabelBehavior.always,
-    errorBorder: const OutlineInputBorder(
-      borderSide: BorderSide(color: Colors.red, width: 1.0),
-      borderRadius: BorderRadius.all(Radius.circular(10.0)),
-    ),
-    focusedErrorBorder: const OutlineInputBorder(
-      borderSide: BorderSide(color: Colors.red, width: 1.0),
-      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+    labelText: label,
+    hintText: hint,
+    labelStyle: TextStyle(color: Colors.grey[800]),
+    // darker label
+    hintStyle: TextStyle(color: Colors.grey[600]),
+    prefixIcon: Icon(Icons.email, color: Colors.blueGrey),
+    // Better visibility
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide(color: Colors.blueAccent, width: 2),
     ),
     enabledBorder: OutlineInputBorder(
-      borderSide: BorderSide(color: textFieldBgColor, width: 1.0),
-      borderRadius: const BorderRadius.all(Radius.circular(10.0)),
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide(color: Colors.grey.shade400),
     ),
-    focusedBorder: OutlineInputBorder(
-      borderSide: BorderSide(color: textFieldBgColor, width: 1.0),
-      borderRadius: BorderRadius.all(Radius.circular(10.0)),
-    ),
+    filled: true,
+    fillColor: Colors.grey[100],
+    contentPadding: EdgeInsets.symmetric(vertical: 18, horizontal: 16),
   );
 }
 
 InputDecoration kInputDecoGradientPassword(
-  String labelText,
-  String hintText,
+  String label,
+  String hint,
   bool isHidden,
-  VoidCallback onToggleVisibility,
+  VoidCallback toggleVisibility,
 ) {
   return InputDecoration(
-    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 18),
-    labelText: labelText,
-    filled: true,
-    suffixIcon: GestureDetector(
-      onTap: onToggleVisibility,
-      child: Icon(
+    labelText: label,
+    hintText: hint,
+    labelStyle: TextStyle(color: Colors.grey[800]),
+    hintStyle: TextStyle(color: Colors.grey[600]),
+    prefixIcon: Icon(Icons.lock, color: Colors.blueGrey),
+    suffixIcon: IconButton(
+      icon: Icon(
         isHidden ? Icons.visibility_off : Icons.visibility,
-        color: textFieldBgColor,
-        size: 25,
+        color: Colors.blueGrey,
       ),
-    ),
-    hintText: hintText,
-    hintStyle: kCustomTextStyle(Colors.blueGrey, padding15, false),
-    counterText: "",
-    labelStyle: kCustomTextStyle(blackColor, padding15, false),
-    fillColor: textFieldBgColor,
-    floatingLabelBehavior: FloatingLabelBehavior.always,
-    errorBorder: const OutlineInputBorder(
-      borderSide: BorderSide(color: Colors.red, width: 1.0),
-      borderRadius: BorderRadius.all(Radius.circular(10.0)),
-    ),
-    focusedErrorBorder: const OutlineInputBorder(
-      borderSide: BorderSide(color: Colors.red, width: 1.0),
-      borderRadius: BorderRadius.all(Radius.circular(10.0)),
-    ),
-    enabledBorder: OutlineInputBorder(
-      borderSide: BorderSide(color: textFieldBgColor, width: 1.0),
-      borderRadius: const BorderRadius.all(Radius.circular(10.0)),
+      onPressed: toggleVisibility,
     ),
     focusedBorder: OutlineInputBorder(
-      borderSide: BorderSide(color: textFieldBgColor, width: 1.0),
-      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide(color: Colors.blueAccent, width: 2),
     ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide(color: Colors.grey.shade400),
+    ),
+    filled: true,
+    fillColor: Colors.grey[100],
+    contentPadding: EdgeInsets.symmetric(vertical: 18, horizontal: 16),
   );
 }
 

@@ -76,7 +76,7 @@ class _ProfileState extends State<Profile> {
                       ],
                     ),
                   ),
-                  Padding(
+                  /*Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: padding10,
                       vertical: padding10,
@@ -84,6 +84,70 @@ class _ProfileState extends State<Profile> {
                     child: Text(
                       FirebaseAuth.instance.currentUser!.email.toString(),
                       style: TextStyle(fontSize: padding20),
+                    ),
+                  ),*/
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: padding20,
+                      vertical: padding10,
+                    ),
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.3),
+                            spreadRadius: 2,
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 30,
+                            backgroundColor: Colors.blueAccent,
+                            child: Icon(
+                              Icons.person,
+                              size: 32,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Logged in as',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  FirebaseAuth.instance.currentUser!.email ??
+                                      'No email',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(
+                            Icons.verified_user,
+                            color: Colors.green,
+                            size: 24,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   Expanded(

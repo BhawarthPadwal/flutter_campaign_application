@@ -270,7 +270,7 @@ class _SignupPageState extends State<SignupPage> {
                 ),
                 heightBox(padding20),
                 ElevatedButton(
-                  onPressed: () async {
+                  /*onPressed: () async {
                     final userCredential =
                         await AuthService().signInWithGoogle();
                     if (userCredential != null) {
@@ -286,8 +286,51 @@ class _SignupPageState extends State<SignupPage> {
                       print('Sign-in cancelled or failed');
                       logger.e('Sign-in cancelled or failed');
                     }
-                  },
-                  child: Text("Sign in with Google"),
+                  },*/
+                    onPressed: () async {
+                      final userCredential = await AuthService().signInWithGoogle();
+                      if (userCredential != null) {
+                        String? uid = userCredential.user?.uid;
+                        String? email = userCredential.user?.email;
+
+                        if (uid != null && email != null) {
+                          bool exists = await ApiManager.isUserExistsInDB(uid);
+
+                          if (!exists) {
+                            await ApiManager.post(
+                              AppReqEndPoint.createUser(),
+                              {"userId": uid, "emailId": email},
+                            );
+                            logger.i("Google user created in DB.");
+                          } else {
+                            logger.i("Google user already exists in DB.");
+                          }
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("Signed in successfully!"),
+                            ),
+                          );
+
+                          Navigator.pushReplacementNamed(context, HomePage.rootName);
+                        } else {
+                          logger.e("Google Sign-In failed: UID or email is null");
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("Google Sign-In failed."),
+                            ),
+                          );
+                        }
+                      } else {
+                        logger.e("Google Sign-In cancelled or failed");
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("Google Sign-In cancelled or failed."),
+                          ),
+                        );
+                      }
+                    },
+                    child: Text("Sign in with Google"),
                 ),
               ],
             ),
