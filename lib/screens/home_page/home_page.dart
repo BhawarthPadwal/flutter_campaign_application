@@ -24,7 +24,6 @@ class _HomePageState extends State<HomePage> {
   int _currentPage = 1;
   bool _isFetchingMore = false;
 
-
   @override
   void initState() {
     super.initState();
@@ -41,14 +40,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200 &&
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200 &&
         !_isFetchingMore) {
       _isFetchingMore = true;
       _currentPage++;
       homeBloc.add(FetchNextPageEvent(_currentPage));
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -60,6 +59,10 @@ class _HomePageState extends State<HomePage> {
       listener: (context, state) {
         if (state is NavigatingProfilePageState) {
           Navigator.pushNamed(context, Profile.rootName);
+        } else if (state is VoteAlreadyExistErrorState) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(state.errorMessage)));
         }
       },
       builder: (context, state) {
@@ -98,7 +101,10 @@ class _HomePageState extends State<HomePage> {
                       children: [
                         Text(
                           'Campaigns',
-                          style: TextStyle(fontSize: padding20),
+                          style: TextStyle(
+                            fontSize: padding20,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         Spacer(),
                         IconButton(
@@ -181,44 +187,189 @@ class _HomePageState extends State<HomePage> {
                         horizontal: padding10,
                         vertical: padding10,
                       ),
-                      child: state is HomeLoadingState
-                          ? Center(child: CircularProgressIndicator())
-                          : state is HomeDataLoadedState
-                          ? Builder(
-                        builder: (_) {
-                          // ✅ Reset pagination flag when data is loaded via pagination
-                          if (state.isPagination) {
-                            _isFetchingMore = false;
-                          }
+                      child:
+                          state is HomeLoadingState
+                              ? Center(child: CircularProgressIndicator())
+                              : state is HomeDataLoadedState
+                              ? Builder(
+                                builder: (_) {
+                                  // ✅ Reset pagination flag when data is loaded via pagination
+                                  if (state.isPagination) {
+                                    _isFetchingMore = false;
+                                  }
 
-                          return state.campaigns.isEmpty
-                              ? Center(child: Text("No campaigns found"))
-                              : ListView.builder(
-                            controller: _scrollController,
-                            shrinkWrap: true,
-                            itemCount: state.campaigns.length,
-                            itemBuilder: (context, index) {
-                              final campaign = state.campaigns[index];
-                              return Card(
-                                child: ListTile(
-                                  title: Text(campaign.name),
-                                  subtitle: Text(campaign.description),
-                                  trailing: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text('👍 ${campaign.votes.upvotes}'),
-                                      Text('👎 ${campaign.votes.downvotes}'),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          );
-                        },
-                      )
-                          : state is HomeErrorState
-                          ? Center(child: Text(state.errorMessage))
-                          : Center(child: Text("No campaigns found")),
+                                  return state.campaigns.isEmpty
+                                      ? Center(
+                                        child: Text("No campaigns found"),
+                                      )
+                                      : ListView.builder(
+                                        controller: _scrollController,
+                                        shrinkWrap: true,
+                                        itemCount: state.campaigns.length,
+                                        itemBuilder: (context, index) {
+                                          final campaign =
+                                              state.campaigns[index];
+                                          return Card(
+                                            elevation: 4,
+                                            margin: const EdgeInsets.symmetric(
+                                              vertical: 8,
+                                              horizontal: 12,
+                                            ),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(16),
+                                            ),
+                                            child: Padding(
+                                              padding: const EdgeInsets.all(
+                                                16.0,
+                                              ),
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    campaign.name,
+                                                    style: const TextStyle(
+                                                      fontSize: 18,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 8),
+                                                  Text(
+                                                    campaign.description,
+                                                    style: const TextStyle(
+                                                      fontSize: 14,
+                                                      color: Colors.black87,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 8),
+                                                  Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
+                                                    children: [
+                                                      Text(
+                                                        "Start: ${campaign.startDate.toLocal().toString().split(' ')[0]}",
+                                                        style: const TextStyle(
+                                                          fontSize: 12,
+                                                          color: Colors.grey,
+                                                        ),
+                                                      ),
+                                                      Text(
+                                                        "End: ${campaign.endDate.toLocal().toString().split(' ')[0]}",
+                                                        style: const TextStyle(
+                                                          fontSize: 12,
+                                                          color: Colors.grey,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  const Divider(height: 20),
+                                                  Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceEvenly,
+                                                    children: [
+                                                      Expanded(
+                                                        child: TextButton.icon(
+                                                          onPressed: () {
+                                                            homeBloc.add(
+                                                              VoteCampaignEvent(
+                                                                FirebaseAuth
+                                                                    .instance
+                                                                    .currentUser!
+                                                                    .uid,
+                                                                campaign
+                                                                    .campaignId
+                                                                    .toString(),
+                                                                true,
+                                                              ),
+                                                            );
+                                                          },
+                                                          style: TextButton.styleFrom(
+                                                            foregroundColor:
+                                                                Colors.black,
+                                                            padding:
+                                                                const EdgeInsets.symmetric(
+                                                                  vertical: 12,
+                                                                ),
+                                                          ),
+                                                          icon: Icon(
+                                                            Icons.thumb_up,
+                                                            color: Colors.green,
+                                                          ),
+                                                          label: Align(
+                                                            alignment:
+                                                                Alignment
+                                                                    .centerLeft,
+                                                            child: Text(
+                                                              '${campaign.votes.upvotes}',
+                                                              style: const TextStyle(
+                                                                color:
+                                                                    Colors
+                                                                        .black,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      Expanded(
+                                                        child: TextButton.icon(
+                                                          onPressed: () {
+                                                            homeBloc.add(
+                                                              VoteCampaignEvent(
+                                                                FirebaseAuth
+                                                                    .instance
+                                                                    .currentUser!
+                                                                    .uid,
+                                                                campaign
+                                                                    .campaignId
+                                                                    .toString(),
+                                                                false,
+                                                              ),
+                                                            );
+                                                          },
+                                                          style: TextButton.styleFrom(
+                                                            foregroundColor:
+                                                                Colors.black,
+                                                            padding:
+                                                                const EdgeInsets.symmetric(
+                                                                  vertical: 12,
+                                                                ),
+                                                          ),
+                                                          icon: Icon(
+                                                            Icons.thumb_down,
+                                                            color: Colors.red,
+                                                          ),
+                                                          label: Align(
+                                                            alignment:
+                                                                Alignment
+                                                                    .centerLeft,
+                                                            child: Text(
+                                                              '${campaign.votes.downvotes}',
+                                                              style: const TextStyle(
+                                                                color:
+                                                                    Colors
+                                                                        .black,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      );
+                                },
+                              )
+                              : state is HomeErrorState
+                              ? Center(child: Text(state.errorMessage))
+                              : Center(child: Text("No campaigns found")),
                     ),
                   ),
 

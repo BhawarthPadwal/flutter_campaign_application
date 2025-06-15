@@ -31,6 +31,11 @@ final class NewCampaignCreationFailedState extends HomeState {
   NewCampaignCreationFailedState(this.errorMessage);
 }
 
+final class VoteAlreadyExistErrorState extends HomeActionableState {
+  final String errorMessage;
+  VoteAlreadyExistErrorState(this.errorMessage);
+}
+
 
 
 

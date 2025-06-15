@@ -26,6 +26,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<FetchSearchedCampaignsEvent>(fetchSearchedCampaignsEvent);
     on<CreateNewCampaignEvent>(createNewCampaignEvent);
     on<FetchNextPageEvent>(fetchNextPageEvent);
+    on<VoteCampaignEvent>(voteCampaignEvent);
   }
 
   Future<void> fetchCampaignsEvent(
@@ -160,6 +161,28 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       }
     } catch (e) {
       emit(NewCampaignCreationFailedState(e.toString()));
+    }
+  }
+
+  FutureOr<void> voteCampaignEvent(
+    VoteCampaignEvent event,
+    Emitter<HomeState> emit,
+  ) async {
+    try {
+      final result = await ApiManager.post(AppReqEndPoint.createVote(), {
+        "campaignId": event.campaignId,
+        "userId": event.userId,
+        "vote": event.isUpvote ? "upvote" : "downvote",
+      });
+      if (result['status'] == 201 || result['status'] == 200) {
+        add(FetchCampaignsEvent());
+      } else {
+        logger.e(result['data']);
+        emit(VoteAlreadyExistErrorState(result['data'].toString()));
+      }
+    } catch (e) {
+      logger.e(e);
+      emit(VoteAlreadyExistErrorState(e.toString()));
     }
   }
 }

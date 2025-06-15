@@ -39,3 +39,10 @@ class CreateNewCampaignEvent extends HomeEvent {
     required this.endDate,
   });
 }
+
+final class VoteCampaignEvent extends HomeEvent {
+  final String userId;
+  final String campaignId;
+  final bool isUpvote;
+  VoteCampaignEvent(this.userId, this.campaignId, this.isUpvote);
+}

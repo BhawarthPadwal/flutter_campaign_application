@@ -30,4 +30,9 @@ class AppReqEndPoint {
   static getCampaignByUserId(String id) {
     return '${AppEnv.getAppEnvironment()}/campaigns/user/$id';
   }
+
+  /// CREATE VOTE
+  static createVote() {
+    return '${AppEnv.getAppEnvironment()}/votes';
+  }
 }

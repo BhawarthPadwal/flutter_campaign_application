@@ -54,7 +54,13 @@ class _ProfileState extends State<Profile> {
                     ),
                     child: Row(
                       children: [
-                        Text('Profile', style: TextStyle(fontSize: padding20)),
+                        Text(
+                          'Profile',
+                          style: TextStyle(
+                            fontSize: padding20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                         Spacer(),
                         IconButton(
                           onPressed: () {
@@ -77,6 +83,7 @@ class _ProfileState extends State<Profile> {
                     ),
                     child: Text(
                       FirebaseAuth.instance.currentUser!.email.toString(),
+                      style: TextStyle(fontSize: padding20),
                     ),
                   ),
                   Expanded(
@@ -104,15 +111,95 @@ class _ProfileState extends State<Profile> {
                               itemBuilder: (context, index) {
                                 final campaign = campaigns[index];
                                 return Card(
-                                  child: ListTile(
-                                    title: Text(campaign.name),
-                                    subtitle: Text(campaign.description),
-                                    trailing: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
+                                  elevation: 4,
+                                  margin: const EdgeInsets.symmetric(
+                                    vertical: 8,
+                                    horizontal: 12,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
-                                        Text('👍 ${campaign.votes.upvotes}'),
-                                        Text('👎 ${campaign.votes.downvotes}'),
+                                        Text(
+                                          campaign.name,
+                                          style: const TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          campaign.description,
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.black87,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              "Start: ${campaign.startDate.toLocal().toString().split(' ')[0]}",
+                                              style: const TextStyle(
+                                                fontSize: 12,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                            Text(
+                                              "End: ${campaign.endDate.toLocal().toString().split(' ')[0]}",
+                                              style: const TextStyle(
+                                                fontSize: 12,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const Divider(height: 20),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceEvenly,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                const Icon(
+                                                  Icons.thumb_up,
+                                                  color: Colors.green,
+                                                  size: 20,
+                                                ),
+                                                const SizedBox(width: 6),
+                                                Text(
+                                                  '${campaign.votes.upvotes}',
+                                                  style: const TextStyle(
+                                                    color: Colors.black,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            Row(
+                                              children: [
+                                                const Icon(
+                                                  Icons.thumb_down,
+                                                  color: Colors.red,
+                                                  size: 20,
+                                                ),
+                                                const SizedBox(width: 6),
+                                                Text(
+                                                  '${campaign.votes.downvotes}',
+                                                  style: const TextStyle(
+                                                    color: Colors.black,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
                                       ],
                                     ),
                                   ),

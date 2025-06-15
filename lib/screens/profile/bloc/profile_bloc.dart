@@ -34,7 +34,6 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     Future.delayed(const Duration(seconds: 2));
     try {
       final dataList = await fetchAndParseCampaigns(event.userId);
-      logger.e("DataList");
       logger.d(dataList);
       emit(ProfileDataLoadedState(dataList));
     } catch (e) {
