@@ -12,6 +12,8 @@ class CampaignDialog extends StatefulWidget {
 }
 
 class CampaignDialogState extends State<CampaignDialog> {
+  final _formKey = GlobalKey<FormState>();
+
   final nameController = TextEditingController();
   final descController = TextEditingController();
   final startDateController = TextEditingController();
@@ -25,7 +27,9 @@ class CampaignDialogState extends State<CampaignDialog> {
       lastDate: DateTime(2100),
     );
     if (pickedDate != null) {
-      controller.text = pickedDate.toIso8601String().substring(0, 10);
+      setState(() {
+        controller.text = pickedDate.toIso8601String().substring(0, 10);
+      });
     }
   }
 
@@ -34,44 +38,73 @@ class CampaignDialogState extends State<CampaignDialog> {
     return AlertDialog(
       title: const Text('Create Campaign'),
       content: SingleChildScrollView(
-        child: Column(
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(labelText: 'Name'),
-            ),
-            TextField(
-              controller: descController,
-              decoration: const InputDecoration(labelText: 'Description'),
-            ),
-            TextField(
-              controller: startDateController,
-              decoration: const InputDecoration(labelText: 'Start Date'),
-              readOnly: true,
-              onTap: () => _pickDate(startDateController),
-            ),
-            TextField(
-              controller: endDateController,
-              decoration: const InputDecoration(labelText: 'End Date'),
-              readOnly: true,
-              onTap: () => _pickDate(endDateController),
-            ),
-          ],
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              TextFormField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: 'Name'),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Name cannot be empty';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: descController,
+                decoration: const InputDecoration(labelText: 'Description'),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Description cannot be empty';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: startDateController,
+                decoration: const InputDecoration(labelText: 'Start Date'),
+                readOnly: true,
+                onTap: () => _pickDate(startDateController),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please select a start date';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: endDateController,
+                decoration: const InputDecoration(labelText: 'End Date'),
+                readOnly: true,
+                onTap: () => _pickDate(endDateController),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please select an end date';
+                  }
+                  return null;
+                },
+              ),
+            ],
+          ),
         ),
       ),
       actions: [
         TextButton(
           onPressed: () {
-            widget.bloc.add(
-              CreateNewCampaignEvent(
-                name: nameController.text,
-                description: descController.text,
-                userId: widget.userId,
-                startDate: startDateController.text,
-                endDate: endDateController.text,
-              ),
-            );
-            Navigator.of(context).pop();
+            if (_formKey.currentState!.validate()) {
+              widget.bloc.add(
+                CreateNewCampaignEvent(
+                  name: nameController.text.trim(),
+                  description: descController.text.trim(),
+                  userId: widget.userId,
+                  startDate: startDateController.text,
+                  endDate: endDateController.text,
+                ),
+              );
+              Navigator.of(context).pop();
+            }
           },
           child: const Text("Submit"),
         ),

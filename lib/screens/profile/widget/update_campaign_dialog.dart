@@ -26,6 +26,8 @@ class UpdateCampaignDialog extends StatefulWidget {
 }
 
 class _UpdateCampaignDialogState extends State<UpdateCampaignDialog> {
+  final _formKey = GlobalKey<FormState>();
+
   late TextEditingController nameController;
   late TextEditingController descController;
   late TextEditingController startDateController;
@@ -57,45 +59,74 @@ class _UpdateCampaignDialogState extends State<UpdateCampaignDialog> {
     return AlertDialog(
       title: const Text('Update Campaign'),
       content: SingleChildScrollView(
-        child: Column(
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(labelText: 'Name'),
-            ),
-            TextField(
-              controller: descController,
-              decoration: const InputDecoration(labelText: 'Description'),
-            ),
-            TextField(
-              controller: startDateController,
-              decoration: const InputDecoration(labelText: 'Start Date'),
-              readOnly: true,
-              onTap: () => _pickDate(startDateController),
-            ),
-            TextField(
-              controller: endDateController,
-              decoration: const InputDecoration(labelText: 'End Date'),
-              readOnly: true,
-              onTap: () => _pickDate(endDateController),
-            ),
-          ],
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              TextFormField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: 'Name'),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Name cannot be empty';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: descController,
+                decoration: const InputDecoration(labelText: 'Description'),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Description cannot be empty';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: startDateController,
+                decoration: const InputDecoration(labelText: 'Start Date'),
+                readOnly: true,
+                onTap: () => _pickDate(startDateController),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please select a start date';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: endDateController,
+                decoration: const InputDecoration(labelText: 'End Date'),
+                readOnly: true,
+                onTap: () => _pickDate(endDateController),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please select an end date';
+                  }
+                  return null;
+                },
+              ),
+            ],
+          ),
         ),
       ),
       actions: [
         TextButton(
           onPressed: () {
-            widget.bloc.add(
-              UpdateCampaignEvent(
-                campaignId: widget.campaignId,
-                userId: widget.userId,
-                name: nameController.text,
-                description: descController.text,
-                startDate: startDateController.text,
-                endDate: endDateController.text,
-              ),
-            );
-            Navigator.of(context).pop();
+            if (_formKey.currentState!.validate()) {
+              widget.bloc.add(
+                UpdateCampaignEvent(
+                  campaignId: widget.campaignId,
+                  userId: widget.userId,
+                  name: nameController.text,
+                  description: descController.text,
+                  startDate: startDateController.text,
+                  endDate: endDateController.text,
+                ),
+              );
+              Navigator.of(context).pop();
+            }
           },
           child: const Text("Update"),
         ),
