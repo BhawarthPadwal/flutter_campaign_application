@@ -1,5 +1,6 @@
 import 'package:campaign_application/screens/authentication/login_page.dart';
 import 'package:campaign_application/screens/profile/bloc/profile_bloc.dart';
+import 'package:campaign_application/screens/profile/widget/update_campaign_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -33,7 +34,31 @@ class _ProfileState extends State<Profile> {
       listenWhen: (previous, current) => current is ProfileActionableState,
       buildWhen: (previous, current) => current is! ProfileActionableState,
       listener: (context, state) {
-        // TODO: implement listener
+        if (state is CampaignDeletedSuccessState) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Campaign deleted successfully'),
+            ),
+          );
+        } else if (state is CampaignDeletedErrorState) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.error),
+            ),
+          );
+        } else if (state is CampaignUpdatedSuccessState) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Campaign updated successfully'),
+            ),
+          );
+        } else if (state is CampaignUpdatedErrorState) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.error),
+            ),
+          );
+        }
       },
       builder: (context, state) {
         return AnnotatedRegion(
@@ -174,97 +199,160 @@ class _ProfileState extends State<Profile> {
                               physics: const BouncingScrollPhysics(),
                               itemBuilder: (context, index) {
                                 final campaign = campaigns[index];
-                                return Card(
-                                  elevation: 4,
-                                  margin: const EdgeInsets.symmetric(
-                                    vertical: 8,
-                                    horizontal: 12,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(16.0),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          campaign.name,
-                                          style: const TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                          ),
+                                return GestureDetector(
+                                  onLongPress: () {
+                                    showModalBottomSheet(
+                                      context: context,
+                                      shape: const RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.vertical(
+                                          top: Radius.circular(20),
                                         ),
-                                        const SizedBox(height: 8),
-                                        Text(
-                                          campaign.description,
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                            color: Colors.black87,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 8),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
+                                      ),
+                                      builder: (context) {
+                                        return Column(
+                                          mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            Text(
-                                              "Start: ${campaign.startDate.toLocal().toString().split(' ')[0]}",
-                                              style: const TextStyle(
-                                                fontSize: 12,
-                                                color: Colors.grey,
+                                            ListTile(
+                                              leading: const Icon(
+                                                Icons.edit,
+                                                color: Colors.blue,
                                               ),
+                                              title: const Text(
+                                                'Edit Campaign',
+                                              ),
+                                              onTap: () {
+                                                Navigator.pop(context);
+                                                showDialog(
+                                                  context: context,
+                                                  builder: (_) => UpdateCampaignDialog(
+                                                    bloc: profileBloc,
+                                                    userId: campaign.usersId,
+                                                    campaignId: campaign.campaignId,
+                                                    initialName: campaign.name,
+                                                    initialDescription: campaign.description,
+                                                    initialStartDate: campaign.startDate.toString().split(' ')[0],
+                                                    initialEndDate: campaign.endDate.toString().split(' ')[0],
+                                                  ),
+                                                );
+                                              },
+
                                             ),
-                                            Text(
-                                              "End: ${campaign.endDate.toLocal().toString().split(' ')[0]}",
-                                              style: const TextStyle(
-                                                fontSize: 12,
-                                                color: Colors.grey,
+                                            ListTile(
+                                              leading: const Icon(
+                                                Icons.delete,
+                                                color: Colors.red,
                                               ),
+                                              title: const Text(
+                                                'Delete Campaign',
+                                              ),
+                                              onTap: () {
+                                                Navigator.pop(context);
+                                                profileBloc.add(
+                                                  DeleteCampaignEvent(
+                                                    campaign.campaignId
+                                                        .toString(),
+                                                    campaign.usersId,
+                                                  ),
+                                                );
+                                              },
                                             ),
                                           ],
-                                        ),
-                                        const Divider(height: 20),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceEvenly,
-                                          children: [
-                                            Row(
-                                              children: [
-                                                const Icon(
-                                                  Icons.thumb_up,
-                                                  color: Colors.green,
-                                                  size: 20,
-                                                ),
-                                                const SizedBox(width: 6),
-                                                Text(
-                                                  '${campaign.votes.upvotes}',
-                                                  style: const TextStyle(
-                                                    color: Colors.black,
-                                                  ),
-                                                ),
-                                              ],
+                                        );
+                                      },
+                                    );
+                                  },
+                                  child: Card(
+                                    elevation: 4,
+                                    margin: const EdgeInsets.symmetric(
+                                      vertical: 8,
+                                      horizontal: 12,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(16.0),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            campaign.name,
+                                            style: const TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
                                             ),
-                                            Row(
-                                              children: [
-                                                const Icon(
-                                                  Icons.thumb_down,
-                                                  color: Colors.red,
-                                                  size: 20,
-                                                ),
-                                                const SizedBox(width: 6),
-                                                Text(
-                                                  '${campaign.votes.downvotes}',
-                                                  style: const TextStyle(
-                                                    color: Colors.black,
-                                                  ),
-                                                ),
-                                              ],
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            campaign.description,
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              color: Colors.black87,
                                             ),
-                                          ],
-                                        ),
-                                      ],
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text(
+                                                "Start: ${campaign.startDate.toLocal().toString().split(' ')[0]}",
+                                                style: const TextStyle(
+                                                  fontSize: 12,
+                                                  color: Colors.grey,
+                                                ),
+                                              ),
+                                              Text(
+                                                "End: ${campaign.endDate.toLocal().toString().split(' ')[0]}",
+                                                style: const TextStyle(
+                                                  fontSize: 12,
+                                                  color: Colors.grey,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const Divider(height: 20),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceEvenly,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  const Icon(
+                                                    Icons.thumb_up,
+                                                    color: Colors.green,
+                                                    size: 20,
+                                                  ),
+                                                  const SizedBox(width: 6),
+                                                  Text(
+                                                    '${campaign.votes.upvotes}',
+                                                    style: const TextStyle(
+                                                      color: Colors.black,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              Row(
+                                                children: [
+                                                  const Icon(
+                                                    Icons.thumb_down,
+                                                    color: Colors.red,
+                                                    size: 20,
+                                                  ),
+                                                  const SizedBox(width: 6),
+                                                  Text(
+                                                    '${campaign.votes.downvotes}',
+                                                    style: const TextStyle(
+                                                      color: Colors.black,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 );

@@ -20,3 +20,19 @@ final class ProfileDataErrorState extends ProfileState {
 
   ProfileDataErrorState(this.error);
 }
+
+final class CampaignDeletedSuccessState extends ProfileActionableState {}
+
+final class CampaignDeletedErrorState extends ProfileActionableState {
+  final String error;
+
+  CampaignDeletedErrorState(this.error);
+}
+
+final class CampaignUpdatedSuccessState extends ProfileActionableState {}
+
+final class CampaignUpdatedErrorState extends ProfileActionableState {
+  final String error;
+
+  CampaignUpdatedErrorState(this.error);
+}

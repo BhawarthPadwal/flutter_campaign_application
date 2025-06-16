@@ -16,6 +16,8 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
   ProfileBloc() : super(ProfileInitialState()) {
     on<FetchUserCampaignsEvent>(fetchUserCampaignsEvent);
+    on<DeleteCampaignEvent>(deleteCampaignEvent);
+    on<UpdateCampaignEvent>(updateCampaignEvent);
   }
 
   Future<List<UserCampaign>> fetchAndParseCampaigns(String id) async {
@@ -38,6 +40,46 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       emit(ProfileDataLoadedState(dataList));
     } catch (e) {
       emit(ProfileDataErrorState(e.toString()));
+    }
+  }
+
+  FutureOr<void> deleteCampaignEvent(DeleteCampaignEvent event, Emitter<ProfileState> emit) async {
+    try {
+       final response = await ApiManager.delete(AppReqEndPoint.deleteCampaign(), {
+         "userId": event.userId,
+         "campaignId": event.campaignId
+       });
+       logger.d(response);
+       if(response['status'] == 200) {
+         emit(ProfileDataLoadedState(await fetchAndParseCampaigns(event.userId)));
+         emit(CampaignDeletedSuccessState());
+       } else {
+         emit(CampaignDeletedErrorState(response['data']['message']));
+       }
+    } catch(e) {
+      emit(CampaignDeletedErrorState(e.toString()));
+    }
+  }
+
+  FutureOr<void> updateCampaignEvent(UpdateCampaignEvent event, Emitter<ProfileState> emit) async {
+    try {
+      final response = await ApiManager.put(AppReqEndPoint.updateCampaign(), {
+        "userId": event.userId,
+        "campaignId": event.campaignId,
+        "name": event.name,
+        "description": event.description,
+        "startDate": event.startDate,
+        "endDate": event.endDate
+      });
+      logger.d(response);
+      if(response['status'] == 200) {
+        emit(ProfileDataLoadedState(await fetchAndParseCampaigns(event.userId)));
+        emit(CampaignUpdatedSuccessState());
+      } else {
+        emit(CampaignUpdatedErrorState(response['data']['message']));
+      }
+    } catch(e) {
+      emit(CampaignUpdatedErrorState(e.toString()));
     }
   }
 }

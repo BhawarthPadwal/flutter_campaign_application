@@ -34,6 +34,64 @@ class ApiManager {
     return responseData;
   }
 
+  static Future<Map<String, dynamic>> delete(
+      String endPoints,
+      Map<String, dynamic>? body,
+      ) async {
+    Logger logger = Logger();
+    dynamic responseData;
+    try {
+      final response = await http.delete(
+        Uri.parse(endPoints),
+        body: jsonEncode(body),
+        headers: {
+          'Content-Type': 'application/json', // ✅ Important
+        },
+      );
+
+      if (response.statusCode == 200) {
+        responseData = {'status': response.statusCode, 'data': response.body};
+        logger.i(responseData);
+      } else {
+        responseData = {'status': response.statusCode, 'data': response.body};
+        logger.e(responseData);
+      }
+      return responseData;
+    } catch (e) {
+      logger.e(e);
+    }
+    return responseData;
+  }
+
+  static Future<Map<String, dynamic>> put(
+      String endPoints,
+      Map<String, dynamic>? body,
+      ) async {
+    Logger logger = Logger();
+    dynamic responseData;
+    try {
+      final response = await http.put(
+        Uri.parse(endPoints),
+        body: jsonEncode(body),
+        headers: {
+          'Content-Type': 'application/json', // ✅ Important
+        },
+      );
+
+      if (response.statusCode == 200) {
+        responseData = {'status': response.statusCode, 'data': response.body};
+        logger.i(responseData);
+      } else {
+        responseData = {'status': response.statusCode, 'data': response.body};
+        logger.e(responseData);
+      }
+      return responseData;
+    } catch (e) {
+      logger.e(e);
+    }
+    return responseData;
+  }
+
   // GET REQUEST
 
   static Future<Map<String, dynamic>> get(String endPoint) async {

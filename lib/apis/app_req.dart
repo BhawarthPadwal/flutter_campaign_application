@@ -35,4 +35,14 @@ class AppReqEndPoint {
   static createVote() {
     return '${AppEnv.getAppEnvironment()}/votes';
   }
+
+  /// DELETE CAMPAIGN
+  static deleteCampaign() {
+    return '${AppEnv.getAppEnvironment()}/campaigns/delete';
+  }
+
+  /// UPDATE CAMPAIGN
+  static updateCampaign() {
+    return '${AppEnv.getAppEnvironment()}/campaigns/update';
+  }
 }
