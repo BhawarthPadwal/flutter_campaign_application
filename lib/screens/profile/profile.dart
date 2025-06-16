@@ -49,7 +49,7 @@ class _ProfileState extends State<Profile> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: padding10,
+                      horizontal: padding20,
                       vertical: padding10,
                     ),
                     child: Row(
@@ -271,7 +271,8 @@ class _ProfileState extends State<Profile> {
                               },
                             );
                           } else if (state is ProfileDataErrorState) {
-                            return Center(child: Text(state.error));
+                            //return Center(child: Text(state.error));
+                            return Center(child: Text("No campaigns found"));
                           } else {
                             return const Center(
                               child: Text("No campaigns found"),

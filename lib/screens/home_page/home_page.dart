@@ -85,16 +85,20 @@ class _HomePageState extends State<HomePage> {
                       ),
                 );
               },
-              backgroundColor: Colors.grey,
+              backgroundColor: blueGreyColor, // Matches your UI theme
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16), // Soft rounded FAB
+              ),
               tooltip: 'Add Campaign', // Or your app's primary color
-              child: Icon(Icons.add, color: blackColor),
+              child: Icon(Icons.add, color: whiteColor),
             ),
             body: SafeArea(
               child: Column(
                 children: [
                   Padding(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: padding10,
+                      horizontal: padding20,
                       vertical: padding10,
                     ),
                     child: Row(
