@@ -41,9 +41,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     _allCampaigns.clear();
 
     try {
-      final dataList = await _fetchAndParseCampaigns(page: _currentPage);
-      _allCampaigns = dataList;
-      emit(HomeDataLoadedState(List.from(_allCampaigns)));
+      final result = await _fetchAndParseCampaigns(page: _currentPage);
+      _allCampaigns = result['data'];
+      emit(HomeDataLoadedState(List.from(_allCampaigns), totalPages: result['totalPages'], currentPage: _currentPage));
     } catch (e) {
       emit(HomeErrorState(e.toString()));
     }
@@ -67,12 +67,10 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     _allCampaigns.clear();
 
     try {
-      final dataList = await _fetchAndParseCampaigns(
-        sort: _sort,
-        page: _currentPage,
-      );
-      _allCampaigns = dataList;
-      emit(HomeDataLoadedState(List.from(_allCampaigns)));
+      final result = await _fetchAndParseCampaigns(sort: _sort, page: _currentPage);
+      _allCampaigns = result['data'];
+      emit(HomeDataLoadedState(List.from(_allCampaigns), totalPages: result['totalPages'], currentPage: _currentPage));
+
     } catch (e) {
       emit(HomeErrorState(e.toString()));
     }
@@ -89,37 +87,52 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     _allCampaigns.clear();
 
     try {
-      final dataList = await _fetchAndParseCampaigns(
-        query: _query,
-        page: _currentPage,
-      );
-      _allCampaigns = dataList;
-      emit(HomeDataLoadedState(List.from(_allCampaigns)));
+      final result = await _fetchAndParseCampaigns(query: _query, page: _currentPage);
+      _allCampaigns = result['data'];
+      emit(HomeDataLoadedState(List.from(_allCampaigns), totalPages: result['totalPages'], currentPage: _currentPage));
+
     } catch (e) {
       emit(HomeErrorState(e.toString()));
     }
   }
 
   FutureOr<void> fetchNextPageEvent(
-    FetchNextPageEvent event,
-    Emitter<HomeState> emit,
-  ) async {
+      FetchNextPageEvent event,
+      Emitter<HomeState> emit,
+      ) async {
+    logger.i('Fetching next page ${event.page} with mode: $_mode, sort: $_sort, query: $_query');
+
     try {
-      final newData = await _fetchAndParseCampaigns(page: event.page);
-      final currentState = state;
-      if (currentState is HomeDataLoadedState) {
-        final updatedList = List<Data>.from(currentState.campaigns)
-          ..addAll(newData);
-        emit(HomeDataLoadedState(updatedList, isPagination: true));
+      Map<String, dynamic> result;
+
+      if (_mode == 'sort') {
+        result = await _fetchAndParseCampaigns(sort: _sort, page: event.page);
+      } else if (_mode == 'search') {
+        result = await _fetchAndParseCampaigns(query: _query, page: event.page);
       } else {
-        emit(HomeDataLoadedState(newData)); // If first page is loaded
+        result = await _fetchAndParseCampaigns(page: event.page);
+      }
+      final newData = result['data'];
+      final totalPages = result['totalPages'];
+      logger.i('Fetched ${newData.length} new campaigns. Total Pages: $totalPages');
+      // Fix: Update current page
+      _currentPage = event.page;
+
+      if (state is HomeDataLoadedState) {
+        final currentState = state as HomeDataLoadedState;
+        final updatedList = List<Data>.from(currentState.campaigns)..addAll(newData);
+        emit(HomeDataLoadedState(updatedList, isPagination: true, totalPages: totalPages, currentPage: _currentPage));
+      } else {
+        emit(HomeDataLoadedState(newData, totalPages: totalPages, currentPage: _currentPage));
       }
     } catch (e) {
+      logger.e('Error fetching next page: $e');
       emit(HomeErrorState(e.toString()));
     }
   }
 
-  Future<List<Data>> _fetchAndParseCampaigns({
+
+  Future<Map<String, dynamic>> _fetchAndParseCampaigns({
     String sort = 'recent',
     String query = '',
     int page = 1,
@@ -131,11 +144,15 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     if (result['status'] == 200) {
       final response = result['data'];
       final Campaigns campaigns = campaignsFromJson(response);
-      return campaigns.data;
+      return {
+        'data': campaigns.data,
+        'totalPages': campaigns.totalPages, // <- from your model
+      };
     } else {
       throw Exception(result['data'].toString());
     }
   }
+
 
   FutureOr<void> createNewCampaignEvent(
     CreateNewCampaignEvent event,
@@ -186,3 +203,47 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     }
   }
 }
+
+/*FutureOr<void> fetchNextPageEvent(
+      FetchNextPageEvent event,
+      Emitter<HomeState> emit,
+      ) async {
+    try {
+      final result = await _fetchAndParseCampaigns(page: event.page);
+      final newData = result['data'];
+      final totalPages = result['totalPages'];
+
+      if (state is HomeDataLoadedState) {
+        final currentState = state as HomeDataLoadedState;
+        final updatedList = List<Data>.from(currentState.campaigns)..addAll(newData);
+        emit(HomeDataLoadedState(updatedList, isPagination: true, totalPages: totalPages));
+      } else {
+        emit(HomeDataLoadedState(newData, totalPages: totalPages));
+      }
+
+    } catch (e) {
+      emit(HomeErrorState(e.toString()));
+    }
+  }*/
+
+/*FutureOr<void> fetchNextPageEvent(
+      FetchNextPageEvent event,
+      Emitter<HomeState> emit,
+      ) async {
+    try {
+      final result = await _fetchAndParseCampaigns(page: event.page);
+      final newData = result['data'];
+      final totalPages = result['totalPages'];
+
+      if (state is HomeDataLoadedState) {
+        final currentState = state as HomeDataLoadedState;
+        final updatedList = List<Data>.from(currentState.campaigns)..addAll(newData);
+        emit(HomeDataLoadedState(updatedList, isPagination: true, totalPages: totalPages));
+      } else {
+        emit(HomeDataLoadedState(newData, totalPages: totalPages));
+      }
+
+    } catch (e) {
+      emit(HomeErrorState(e.toString()));
+    }
+  }*/

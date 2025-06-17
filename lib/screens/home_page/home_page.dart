@@ -19,9 +19,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   HomeBloc homeBloc = HomeBloc();
   String searchQuery = '';
-
   late ScrollController _scrollController;
-  int _currentPage = 1;
   bool _isFetchingMore = false;
 
   @override
@@ -41,11 +39,16 @@ class _HomePageState extends State<HomePage> {
 
   void _onScroll() {
     if (_scrollController.position.pixels >=
-            _scrollController.position.maxScrollExtent - 200 &&
-        !_isFetchingMore) {
-      _isFetchingMore = true;
-      _currentPage++;
-      homeBloc.add(FetchNextPageEvent(_currentPage));
+        _scrollController.position.maxScrollExtent - 200 &&
+        !_isFetchingMore &&
+        homeBloc.state is HomeDataLoadedState) {
+      final currentState = homeBloc.state as HomeDataLoadedState;
+      final nextPage = currentState.currentPage + 1;
+
+      if (nextPage <= currentState.totalPages) { /// Check if there are more pages to fetch
+        _isFetchingMore = true;
+        homeBloc.add(FetchNextPageEvent(nextPage));
+      }
     }
   }
 
@@ -85,12 +88,14 @@ class _HomePageState extends State<HomePage> {
                       ),
                 );
               },
-              backgroundColor: blueGreyColor, // Matches your UI theme
+              backgroundColor: blueGreyColor,
+              // Matches your UI theme
               elevation: 4,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16), // Soft rounded FAB
               ),
-              tooltip: 'Add Campaign', // Or your app's primary color
+              tooltip: 'Add Campaign',
+              // Or your app's primary color
               child: Icon(Icons.add, color: whiteColor),
             ),
             body: SafeArea(
@@ -204,177 +209,214 @@ class _HomePageState extends State<HomePage> {
                               : state is HomeDataLoadedState
                               ? Builder(
                                 builder: (_) {
-                                  // ✅ Reset pagination flag when data is loaded via pagination
-                                  if (state.isPagination) {
+                                  if (state.isPagination) { /// Reset pagination flag when data is loaded via pagination
                                     _isFetchingMore = false;
                                   }
-
                                   return state.campaigns.isEmpty
                                       ? Center(
                                         child: Text("No campaigns found"),
                                       )
-                                      : ListView.builder(
-                                        controller: _scrollController,
-                                        shrinkWrap: true,
-                                        itemCount: state.campaigns.length,
-                                        itemBuilder: (context, index) {
-                                          final campaign =
-                                              state.campaigns[index];
-                                          return Card(
-                                            elevation: 4,
-                                            margin: const EdgeInsets.symmetric(
-                                              vertical: 8,
-                                              horizontal: 12,
-                                            ),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(16),
-                                            ),
-                                            child: Padding(
-                                              padding: const EdgeInsets.all(
-                                                16.0,
-                                              ),
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    campaign.name,
-                                                    style: const TextStyle(
-                                                      fontSize: 18,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                    ),
-                                                  ),
-                                                  const SizedBox(height: 8),
-                                                  Text(
-                                                    campaign.description,
-                                                    style: const TextStyle(
-                                                      fontSize: 14,
-                                                      color: Colors.black87,
-                                                    ),
-                                                  ),
-                                                  const SizedBox(height: 8),
-                                                  Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceBetween,
-                                                    children: [
-                                                      Text(
-                                                        "Start: ${campaign.startDate.toLocal().toString().split(' ')[0]}",
-                                                        style: const TextStyle(
-                                                          fontSize: 12,
-                                                          color: Colors.grey,
-                                                        ),
-                                                      ),
-                                                      Text(
-                                                        "End: ${campaign.endDate.toLocal().toString().split(' ')[0]}",
-                                                        style: const TextStyle(
-                                                          fontSize: 12,
-                                                          color: Colors.grey,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  const Divider(height: 20),
-                                                  Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceEvenly,
-                                                    children: [
-                                                      Expanded(
-                                                        child: TextButton.icon(
-                                                          onPressed: () {
-                                                            homeBloc.add(
-                                                              VoteCampaignEvent(
-                                                                FirebaseAuth
-                                                                    .instance
-                                                                    .currentUser!
-                                                                    .uid,
-                                                                campaign
-                                                                    .campaignId
-                                                                    .toString(),
-                                                                true,
-                                                              ),
-                                                            );
-                                                          },
-                                                          style: TextButton.styleFrom(
-                                                            foregroundColor:
-                                                                Colors.black,
-                                                            padding:
-                                                                const EdgeInsets.symmetric(
-                                                                  vertical: 12,
-                                                                ),
-                                                          ),
-                                                          icon: Icon(
-                                                            Icons.thumb_up,
-                                                            color: Colors.green,
-                                                          ),
-                                                          label: Align(
-                                                            alignment:
-                                                                Alignment
-                                                                    .centerLeft,
-                                                            child: Text(
-                                                              '${campaign.votes.upvotes}',
-                                                              style: const TextStyle(
-                                                                color:
-                                                                    Colors
-                                                                        .black,
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      Expanded(
-                                                        child: TextButton.icon(
-                                                          onPressed: () {
-                                                            homeBloc.add(
-                                                              VoteCampaignEvent(
-                                                                FirebaseAuth
-                                                                    .instance
-                                                                    .currentUser!
-                                                                    .uid,
-                                                                campaign
-                                                                    .campaignId
-                                                                    .toString(),
-                                                                false,
-                                                              ),
-                                                            );
-                                                          },
-                                                          style: TextButton.styleFrom(
-                                                            foregroundColor:
-                                                                Colors.black,
-                                                            padding:
-                                                                const EdgeInsets.symmetric(
-                                                                  vertical: 12,
-                                                                ),
-                                                          ),
-                                                          icon: Icon(
-                                                            Icons.thumb_down,
-                                                            color: Colors.red,
-                                                          ),
-                                                          label: Align(
-                                                            alignment:
-                                                                Alignment
-                                                                    .centerLeft,
-                                                            child: Text(
-                                                              '${campaign.votes.downvotes}',
-                                                              style: const TextStyle(
-                                                                color:
-                                                                    Colors
-                                                                        .black,
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
+                                      : RefreshIndicator(
+                                        onRefresh: () {
+                                          homeBloc.add(FetchCampaignsEvent());
+                                          return Future.delayed(
+                                            Duration(seconds: 1),
                                           );
                                         },
+                                        child: ListView.builder(
+                                          controller: _scrollController,
+                                          itemCount: state.campaigns.length + 1,
+                                          itemBuilder: (context, index) {
+                                            if (index <
+                                                state.campaigns.length) {
+                                              final campaign =
+                                                  state.campaigns[index];
+                                              return Card(
+                                                elevation: 4,
+                                                margin:
+                                                    const EdgeInsets.symmetric(
+                                                      vertical: 8,
+                                                      horizontal: 12,
+                                                    ),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(16),
+                                                ),
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(
+                                                    16.0,
+                                                  ),
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Text(
+                                                        campaign.name,
+                                                        style: const TextStyle(
+                                                          fontSize: 18,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                        ),
+                                                      ),
+                                                      const SizedBox(height: 8),
+                                                      Text(
+                                                        campaign.description,
+                                                        style: const TextStyle(
+                                                          fontSize: 14,
+                                                          color: Colors.black87,
+                                                        ),
+                                                      ),
+                                                      const SizedBox(height: 8),
+                                                      Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
+                                                        children: [
+                                                          Text(
+                                                            "Start: ${campaign.startDate.toLocal().toString().split(' ')[0]}",
+                                                            style:
+                                                                const TextStyle(
+                                                                  fontSize: 12,
+                                                                  color:
+                                                                      Colors
+                                                                          .grey,
+                                                                ),
+                                                          ),
+                                                          Text(
+                                                            "End: ${campaign.endDate.toLocal().toString().split(' ')[0]}",
+                                                            style:
+                                                                const TextStyle(
+                                                                  fontSize: 12,
+                                                                  color:
+                                                                      Colors
+                                                                          .grey,
+                                                                ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      const Divider(height: 20),
+                                                      Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceEvenly,
+                                                        children: [
+                                                          Expanded(
+                                                            child: TextButton.icon(
+                                                              onPressed: () {
+                                                                homeBloc.add(
+                                                                  VoteCampaignEvent(
+                                                                    FirebaseAuth
+                                                                        .instance
+                                                                        .currentUser!
+                                                                        .uid,
+                                                                    campaign
+                                                                        .campaignId
+                                                                        .toString(),
+                                                                    true,
+                                                                  ),
+                                                                );
+                                                              },
+                                                              style: TextButton.styleFrom(
+                                                                foregroundColor:
+                                                                    Colors
+                                                                        .black,
+                                                                padding:
+                                                                    const EdgeInsets.symmetric(
+                                                                      vertical:
+                                                                          12,
+                                                                    ),
+                                                              ),
+                                                              icon: Icon(
+                                                                Icons.thumb_up,
+                                                                color:
+                                                                    Colors
+                                                                        .green,
+                                                              ),
+                                                              label: Align(
+                                                                alignment:
+                                                                    Alignment
+                                                                        .centerLeft,
+                                                                child: Text(
+                                                                  '${campaign.votes.upvotes}',
+                                                                  style: const TextStyle(
+                                                                    color:
+                                                                        Colors
+                                                                            .black,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          Expanded(
+                                                            child: TextButton.icon(
+                                                              onPressed: () {
+                                                                homeBloc.add(
+                                                                  VoteCampaignEvent(
+                                                                    FirebaseAuth
+                                                                        .instance
+                                                                        .currentUser!
+                                                                        .uid,
+                                                                    campaign
+                                                                        .campaignId
+                                                                        .toString(),
+                                                                    false,
+                                                                  ),
+                                                                );
+                                                              },
+                                                              style: TextButton.styleFrom(
+                                                                foregroundColor:
+                                                                    Colors
+                                                                        .black,
+                                                                padding:
+                                                                    const EdgeInsets.symmetric(
+                                                                      vertical:
+                                                                          12,
+                                                                    ),
+                                                              ),
+                                                              icon: Icon(
+                                                                Icons
+                                                                    .thumb_down,
+                                                                color:
+                                                                    Colors.red,
+                                                              ),
+                                                              label: Align(
+                                                                alignment:
+                                                                    Alignment
+                                                                        .centerLeft,
+                                                                child: Text(
+                                                                  '${campaign.votes.downvotes}',
+                                                                  style: const TextStyle(
+                                                                    color:
+                                                                        Colors
+                                                                            .black,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              );
+                                            } else {
+                                              return state.currentPage < state.totalPages
+                                                  ? Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                          16.0,
+                                                        ),
+                                                    child: Center(
+                                                      child:
+                                                          CircularProgressIndicator(),
+                                                    ),
+                                                  )
+                                                  : SizedBox.shrink();
+                                            }
+                                          },
+                                        ),
                                       );
                                 },
                               )
