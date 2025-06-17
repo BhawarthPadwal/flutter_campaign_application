@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:campaign_application/screens/home_page/bloc/home_bloc.dart';
 import 'package:campaign_application/screens/profile/profile.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +23,7 @@ class _HomePageState extends State<HomePage> {
   String searchQuery = '';
   late ScrollController _scrollController;
   bool _isFetchingMore = false;
+  Timer? _debounce;
 
   @override
   void initState() {
@@ -35,6 +38,13 @@ class _HomePageState extends State<HomePage> {
   void dispose() {
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onSearchChanged(String query) {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      homeBloc.add(FetchSearchedCampaignsEvent(query));
+    });
   }
 
   void _onScroll() {
@@ -135,12 +145,7 @@ class _HomePageState extends State<HomePage> {
                         SizedBox(
                           width: size.width * 0.825,
                           child: TextField(
-                            onChanged: (value) {
-                              searchQuery = value;
-                              homeBloc.add(
-                                FetchSearchedCampaignsEvent(searchQuery),
-                              );
-                            },
+                            onChanged: _onSearchChanged,
                             cursorColor: Colors.black,
                             decoration: InputDecoration(
                               hintText: 'Search campaigns...',
