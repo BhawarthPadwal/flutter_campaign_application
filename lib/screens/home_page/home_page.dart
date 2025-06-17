@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:campaign_application/screens/home_page/bloc/home_bloc.dart';
 import 'package:campaign_application/screens/profile/profile.dart';
+import 'package:campaign_application/screens/shimmer_screens/campaign_card_shimmer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -210,7 +211,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                       child:
                           state is HomeLoadingState
-                              ? Center(child: CircularProgressIndicator())
+                              ? ListView.builder(itemCount: 6, itemBuilder: (context, index) => shimmerCampaignCard())
                               : state is HomeDataLoadedState
                               ? Builder(
                                 builder: (_) {
@@ -415,7 +416,7 @@ class _HomePageState extends State<HomePage> {
                                                         ),
                                                     child: Center(
                                                       child:
-                                                          CircularProgressIndicator(),
+                                                          CircularProgressIndicator(color: Colors.grey[300]),
                                                     ),
                                                   )
                                                   : SizedBox.shrink();
@@ -430,49 +431,6 @@ class _HomePageState extends State<HomePage> {
                               : Center(child: Text("No campaigns found")),
                     ),
                   ),
-
-                  /*Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: padding10,
-                        vertical: padding10,
-                      ),
-                      child:
-                          state is HomeLoadingState
-                              ? Center(child: CircularProgressIndicator())
-                              : state is HomeDataLoadedState
-                              ? state.campaigns.isEmpty
-                                  ? Center(child: Text("No campaigns found"))
-                                  : ListView.builder(
-                                    shrinkWrap: true,
-                                    itemCount: state.campaigns.length,
-                                    itemBuilder: (context, index) {
-                                      final campaign = state.campaigns[index];
-                                      return Card(
-                                        child: ListTile(
-                                          title: Text(campaign.name),
-                                          subtitle: Text(campaign.description),
-                                          trailing: Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                '👍 ${campaign.votes.upvotes}',
-                                              ),
-                                              Text(
-                                                '👎 ${campaign.votes.downvotes}',
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  )
-                              : state is HomeErrorState
-                              ? Center(child: Text(state.errorMessage))
-                              : Center(child: Text("No campaigns found")),
-                    ),
-                  ),*/
                 ],
               ),
             ),

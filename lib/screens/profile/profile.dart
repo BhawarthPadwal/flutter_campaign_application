@@ -1,6 +1,7 @@
 import 'package:campaign_application/screens/authentication/login_page.dart';
 import 'package:campaign_application/screens/profile/bloc/profile_bloc.dart';
 import 'package:campaign_application/screens/profile/widget/update_campaign_dialog.dart';
+import 'package:campaign_application/screens/shimmer_screens/campaign_card_shimmer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -101,16 +102,6 @@ class _ProfileState extends State<Profile> {
                       ],
                     ),
                   ),
-                  /*Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: padding10,
-                      vertical: padding10,
-                    ),
-                    child: Text(
-                      FirebaseAuth.instance.currentUser!.email.toString(),
-                      style: TextStyle(fontSize: padding20),
-                    ),
-                  ),*/
                   Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: padding20,
@@ -184,9 +175,7 @@ class _ProfileState extends State<Profile> {
                       child: Builder(
                         builder: (_) {
                           if (state is ProfileDataLoadingState) {
-                            return const Center(
-                              child: CircularProgressIndicator(),
-                            );
+                            return ListView.builder(itemCount: 3,itemBuilder: (context, index) => shimmerCampaignCard());
                           } else if (state is ProfileDataLoadedState) {
                             final campaigns = state.campaigns;
                             if (campaigns.isEmpty) {
