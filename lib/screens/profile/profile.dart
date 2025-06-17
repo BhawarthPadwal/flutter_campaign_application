@@ -1,6 +1,6 @@
 import 'package:campaign_application/screens/authentication/login_page.dart';
 import 'package:campaign_application/screens/profile/bloc/profile_bloc.dart';
-import 'package:campaign_application/screens/profile/widget/update_campaign_dialog.dart';
+import 'package:campaign_application/screens/profile/services/profile_services.dart';
 import 'package:campaign_application/screens/shimmer_screens/campaign_card_shimmer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -175,7 +175,7 @@ class _ProfileState extends State<Profile> {
                       child: Builder(
                         builder: (_) {
                           if (state is ProfileDataLoadingState) {
-                            return ListView.builder(itemCount: 3,itemBuilder: (context, index) => shimmerCampaignCard());
+                            return ListView.builder(itemCount: 4,itemBuilder: (context, index) => shimmerCampaignCard());
                           } else if (state is ProfileDataLoadedState) {
                             final campaigns = state.campaigns;
                             if (campaigns.isEmpty) {
@@ -189,161 +189,10 @@ class _ProfileState extends State<Profile> {
                               itemBuilder: (context, index) {
                                 final campaign = campaigns[index];
                                 return GestureDetector(
-                                  onLongPress: () {
-                                    showModalBottomSheet(
-                                      context: context,
-                                      shape: const RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.vertical(
-                                          top: Radius.circular(20),
-                                        ),
-                                      ),
-                                      builder: (context) {
-                                        return Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            ListTile(
-                                              leading: const Icon(
-                                                Icons.edit,
-                                                color: Colors.blue,
-                                              ),
-                                              title: const Text(
-                                                'Edit Campaign',
-                                              ),
-                                              onTap: () {
-                                                Navigator.pop(context);
-                                                showDialog(
-                                                  context: context,
-                                                  builder: (_) => UpdateCampaignDialog(
-                                                    bloc: profileBloc,
-                                                    userId: campaign.usersId,
-                                                    campaignId: campaign.campaignId,
-                                                    initialName: campaign.name,
-                                                    initialDescription: campaign.description,
-                                                    initialStartDate: campaign.startDate.toString().split(' ')[0],
-                                                    initialEndDate: campaign.endDate.toString().split(' ')[0],
-                                                  ),
-                                                );
-                                              },
-
-                                            ),
-                                            ListTile(
-                                              leading: const Icon(
-                                                Icons.delete,
-                                                color: Colors.red,
-                                              ),
-                                              title: const Text(
-                                                'Delete Campaign',
-                                              ),
-                                              onTap: () {
-                                                Navigator.pop(context);
-                                                profileBloc.add(
-                                                  DeleteCampaignEvent(
-                                                    campaign.campaignId
-                                                        .toString(),
-                                                    campaign.usersId,
-                                                  ),
-                                                );
-                                              },
-                                            ),
-                                          ],
-                                        );
-                                      },
-                                    );
+                                  onTap: () {
+                                    showCampaignBottomSheet(context: context, campaign: campaign, profileBloc: profileBloc);
                                   },
-                                  child: Card(
-                                    elevation: 4,
-                                    margin: const EdgeInsets.symmetric(
-                                      vertical: 8,
-                                      horizontal: 12,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(16.0),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            campaign.name,
-                                            style: const TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 8),
-                                          Text(
-                                            campaign.description,
-                                            style: const TextStyle(
-                                              fontSize: 14,
-                                              color: Colors.black87,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 8),
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Text(
-                                                "Start: ${campaign.startDate.toLocal().toString().split(' ')[0]}",
-                                                style: const TextStyle(
-                                                  fontSize: 12,
-                                                  color: Colors.grey,
-                                                ),
-                                              ),
-                                              Text(
-                                                "End: ${campaign.endDate.toLocal().toString().split(' ')[0]}",
-                                                style: const TextStyle(
-                                                  fontSize: 12,
-                                                  color: Colors.grey,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          const Divider(height: 20),
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceEvenly,
-                                            children: [
-                                              Row(
-                                                children: [
-                                                  const Icon(
-                                                    Icons.thumb_up,
-                                                    color: Colors.green,
-                                                    size: 20,
-                                                  ),
-                                                  const SizedBox(width: 6),
-                                                  Text(
-                                                    '${campaign.votes.upvotes}',
-                                                    style: const TextStyle(
-                                                      color: Colors.black,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                              Row(
-                                                children: [
-                                                  const Icon(
-                                                    Icons.thumb_down,
-                                                    color: Colors.red,
-                                                    size: 20,
-                                                  ),
-                                                  const SizedBox(width: 6),
-                                                  Text(
-                                                    '${campaign.votes.downvotes}',
-                                                    style: const TextStyle(
-                                                      color: Colors.black,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
+                                  child: userCampaignCard(context, campaign, profileBloc),
                                 );
                               },
                             );
