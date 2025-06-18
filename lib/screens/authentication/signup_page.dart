@@ -11,7 +11,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logger/logger.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import '../../themes/theme.dart';
+import '../../themes/constants.dart';
 
 class SignupPage extends StatefulWidget {
   static const String rootName = 'signupPage';
@@ -73,8 +73,8 @@ class _SignupPageState extends State<SignupPage> {
                     Padding(
                       padding: const EdgeInsets.all(padding10),
                       child: Text(
-                        "Let's you sign in",
-                        style: kCustomTextStyle(blackColor, padding25, true),
+                        "Sign In to Campaign Central",
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800, fontSize: padding24),
                       ),
                     ),
                     heightBox(padding40),
@@ -90,6 +90,7 @@ class _SignupPageState extends State<SignupPage> {
                         keyboardType: TextInputType.emailAddress,
                         style: kCustomTextStyle(blackColor, padding15, false),
                         decoration: kInputDecoGradient(
+                          context,
                           "email",
                           "eg.xxxx@gmail.com",
                         ),
@@ -116,6 +117,7 @@ class _SignupPageState extends State<SignupPage> {
                           false,
                         ),
                         decoration: kInputDecoGradientPassword(
+                          context,
                           'Password',
                           '***************',
                           _pass1isHidden,
@@ -148,6 +150,7 @@ class _SignupPageState extends State<SignupPage> {
                           false,
                         ),
                         decoration: kInputDecoGradientPassword(
+                          context,
                           'Confirm Password',
                           '***************',
                           _pass2isHidden,
@@ -195,19 +198,9 @@ class _SignupPageState extends State<SignupPage> {
                               );
                             }
                           },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: blackColor,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
+                          style: Theme.of(context).elevatedButtonTheme.style,
                           child: Text(
                             'Sign in',
-                            style: kCustomTextStyle(
-                              Colors.white,
-                              padding18,
-                              true,
-                            ),
                           ),
                         ),
                       ),
@@ -222,13 +215,15 @@ class _SignupPageState extends State<SignupPage> {
                       },
                       child: Text(
                         "Already have an account. Kindly login here.",
+                        style: Theme.of(context).textTheme.bodyLarge,
                       ),
                     ),
-                    heightBox(padding20),
+                    heightBox(padding40),
                     ElevatedButton(
                       onPressed: () {
                         authBloc.add(GoogleSignInEvent());
                       },
+                      style: Theme.of(context).elevatedButtonTheme.style,
                       child: Text("Sign in with Google"),
                     ),
                   ],

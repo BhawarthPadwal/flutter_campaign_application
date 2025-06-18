@@ -8,7 +8,7 @@ import 'package:campaign_application/screens/shimmer_screens/campaign_card_shimm
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../themes/theme.dart';
+import '../../themes/constants.dart';
 import '../home_page/widget/campaign_dialog.dart';
 
 class HomePage extends StatefulWidget {
@@ -93,7 +93,6 @@ class _HomePageState extends State<HomePage> {
             statusBarIconBrightness: Brightness.dark,
           ),
           child: Scaffold(
-            backgroundColor: whiteColor,
             floatingActionButton: FloatingActionButton(
               onPressed: () {
                 showDialog(
@@ -173,11 +172,7 @@ class _HomePageState extends State<HomePage> {
                         Expanded(
                           child: SizedBox(
                             child: PopupMenuButton<String>(
-                              icon: Image.asset(
-                                'assets/icons/ic_filter.png',
-                                width: padding25,
-                                height: padding25,
-                              ),
+                              icon: Icon(Icons.menu),
                               onSelected: (String selectedSort) {
                                 homeBloc.add(
                                   FetchSortedCampaignsEvents(selectedSort),
@@ -216,7 +211,7 @@ class _HomePageState extends State<HomePage> {
                               ? ListView.builder(
                                 itemCount: 6,
                                 itemBuilder:
-                                    (context, index) => shimmerCampaignCard(),
+                                    (context, index) => shimmerCampaignCard(context),
                               )
                               : state is HomeDataLoadedState
                               ? Builder(

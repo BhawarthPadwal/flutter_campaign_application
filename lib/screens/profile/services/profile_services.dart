@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:campaign_application/models/campaigns_by_userid_model.dart';
 import 'package:campaign_application/screens/profile/bloc/profile_bloc.dart';
 
+import '../../../themes/constants.dart';
+
 
 void showCampaignBottomSheet({
   required BuildContext context,
@@ -76,18 +78,15 @@ Widget userCampaignCard(BuildContext context, UserCampaign campaign, ProfileBloc
         children: [
           Text(
             campaign.name,
-            style: const TextStyle(
-              fontSize: 18,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
+              fontSize: padding18,
             ),
           ),
           const SizedBox(height: 8),
           Text(
             campaign.description,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Colors.black87,
-            ),
+            style: Theme.of(context).textTheme.bodyLarge
           ),
           const SizedBox(height: 8),
           Row(
@@ -96,17 +95,11 @@ Widget userCampaignCard(BuildContext context, UserCampaign campaign, ProfileBloc
             children: [
               Text(
                 "Start: ${campaign.startDate.toLocal().toString().split(' ')[0]}",
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey,
-                ),
+                style: Theme.of(context).textTheme.labelLarge
               ),
               Text(
                 "End: ${campaign.endDate.toLocal().toString().split(' ')[0]}",
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey,
-                ),
+                style: Theme.of(context).textTheme.labelLarge
               ),
             ],
           ),
@@ -125,9 +118,7 @@ Widget userCampaignCard(BuildContext context, UserCampaign campaign, ProfileBloc
                   const SizedBox(width: 6),
                   Text(
                     '${campaign.votes.upvotes}',
-                    style: const TextStyle(
-                      color: Colors.black,
-                    ),
+                    style: Theme.of(context).textTheme.labelLarge
                   ),
                 ],
               ),
@@ -141,9 +132,7 @@ Widget userCampaignCard(BuildContext context, UserCampaign campaign, ProfileBloc
                   const SizedBox(width: 6),
                   Text(
                     '${campaign.votes.downvotes}',
-                    style: const TextStyle(
-                      color: Colors.black,
-                    ),
+                    style: Theme.of(context).textTheme.labelLarge
                   ),
                 ],
               ),

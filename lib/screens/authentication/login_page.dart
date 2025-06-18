@@ -1,7 +1,7 @@
 import 'package:campaign_application/screens/authentication/bloc/auth_bloc.dart';
 import 'package:campaign_application/screens/authentication/signup_page.dart';
 import 'package:campaign_application/screens/home_page/home_page.dart';
-import 'package:campaign_application/themes/theme.dart';
+import 'package:campaign_application/themes/constants.dart';
 import 'package:campaign_application/utilities/utilities.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -64,8 +64,8 @@ class _LoginPageState extends State<LoginPage> {
                     Padding(
                       padding: const EdgeInsets.all(padding10),
                       child: Text(
-                        "Let's you sign in",
-                        style: kCustomTextStyle(blackColor, padding25, true),
+                        "Welcome Back",
+                        style: Theme.of(context).textTheme.headlineLarge?.copyWith(fontWeight: FontWeight.w800, fontSize: padding24),
                       ),
                     ),
                     heightBox(padding40),
@@ -79,8 +79,9 @@ class _LoginPageState extends State<LoginPage> {
                         autofocus: false,
                         textInputAction: TextInputAction.next,
                         keyboardType: TextInputType.emailAddress,
-                        style: kCustomTextStyle(blackColor, padding15, false),
+                        style: Theme.of(context).textTheme.titleLarge,
                         decoration: kInputDecoGradient(
+                          context,
                           "email",
                           "eg.xxxx@gmail.com",
                         ),
@@ -101,12 +102,9 @@ class _LoginPageState extends State<LoginPage> {
                         keyboardType: TextInputType.text,
                         obscureText: _isHidden,
                         obscuringCharacter: '*',
-                        style: kTextStyleCustomSubText(
-                          blackColor,
-                          padding14,
-                          false,
-                        ),
+                        style: Theme.of(context).textTheme.titleLarge,
                         decoration: kInputDecoGradientPassword(
+                          context,
                           'Password',
                           '***************',
                           _isHidden,
@@ -138,26 +136,12 @@ class _LoginPageState extends State<LoginPage> {
                                 SignInEvent(email: email, password: password),
                               );
                             } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text("Kindly enter all fields!"),
-                                ),
-                              );
+                              showSnackbar(context, message: "Kindly enter all fields!");
                             }
                           },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: blackColor,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
+                          style: Theme.of(context).elevatedButtonTheme.style,
                           child: Text(
                             'Login',
-                            style: kCustomTextStyle(
-                              Colors.white,
-                              padding18,
-                              true,
-                            ),
                           ),
                         ),
                       ),
@@ -169,13 +153,15 @@ class _LoginPageState extends State<LoginPage> {
                       },
                       child: Text(
                         "Don't have an account. Kindly create account.",
+                        style: Theme.of(context).textTheme.bodyLarge,
                       ),
                     ),
-                    heightBox(padding20),
+                    heightBox(padding40),
                     ElevatedButton(
                       onPressed: () async {
                         authBloc.add(GoogleSignInEvent());
                       },
+                      style: Theme.of(context).elevatedButtonTheme.style,
                       child: Text("Sign in with Google"),
                     ),
                   ],

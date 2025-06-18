@@ -1,5 +1,6 @@
 import 'package:campaign_application/models/campaigns_model.dart';
 import 'package:campaign_application/screens/home_page/bloc/home_bloc.dart';
+import 'package:campaign_application/themes/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -7,9 +8,7 @@ Widget campaignCard(BuildContext context, Data campaign, HomeBloc homeBloc) {
   return Card(
     elevation: 4,
     margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(16),
-    ),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
     child: Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -17,12 +16,15 @@ Widget campaignCard(BuildContext context, Data campaign, HomeBloc homeBloc) {
         children: [
           Text(
             campaign.name,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              fontSize: padding18,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
             campaign.description,
-            style: const TextStyle(fontSize: 14, color: Colors.black87),
+            style: Theme.of(context).textTheme.bodyLarge,
           ),
           const SizedBox(height: 8),
           Row(
@@ -30,11 +32,11 @@ Widget campaignCard(BuildContext context, Data campaign, HomeBloc homeBloc) {
             children: [
               Text(
                 "Start: ${campaign.startDate.toLocal().toString().split(' ')[0]}",
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                style: Theme.of(context).textTheme.labelLarge,
               ),
               Text(
                 "End: ${campaign.endDate.toLocal().toString().split(' ')[0]}",
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                style: Theme.of(context).textTheme.labelLarge,
               ),
             ],
           ),
@@ -62,7 +64,7 @@ Widget campaignCard(BuildContext context, Data campaign, HomeBloc homeBloc) {
                     alignment: Alignment.centerLeft,
                     child: Text(
                       '${campaign.votes.upvotes}',
-                      style: const TextStyle(color: Colors.black),
+                      style: Theme.of(context).textTheme.labelLarge,
                     ),
                   ),
                 ),
@@ -87,7 +89,7 @@ Widget campaignCard(BuildContext context, Data campaign, HomeBloc homeBloc) {
                     alignment: Alignment.centerLeft,
                     child: Text(
                       '${campaign.votes.downvotes}',
-                      style: const TextStyle(color: Colors.black),
+                      style: Theme.of(context).textTheme.labelLarge,
                     ),
                   ),
                 ),

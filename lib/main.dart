@@ -1,5 +1,6 @@
 import 'package:campaign_application/routes/routes.dart';
 import 'package:campaign_application/screens/splash_screen/splash_screen.dart';
+import 'package:campaign_application/themes/constants.dart';
 import 'package:campaign_application/themes/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -25,11 +26,9 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'CampaignApplication',
         debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          primarySwatch: Colors.blueGrey,
-          primaryColor: primaryColor,
-          scaffoldBackgroundColor: whiteColor,
-        ),
+        themeMode: ThemeMode.system,
+        theme: kAppTheme.lightTheme,
+        darkTheme: kAppTheme.darkTheme,
         home: const SplashScreen(),
         initialRoute: SplashScreen.rootName,
         onGenerateRoute: Routes.generateRoute,

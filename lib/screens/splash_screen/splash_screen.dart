@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:campaign_application/screens/home_page/home_page.dart';
-import 'package:campaign_application/themes/theme.dart';
+import 'package:campaign_application/themes/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';

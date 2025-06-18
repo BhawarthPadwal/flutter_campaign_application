@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../auth_services/auth_service.dart';
-import '../../themes/theme.dart';
+import '../../themes/constants.dart';
 
 class Profile extends StatefulWidget {
   static const String rootName = 'profilePage';
@@ -75,7 +75,6 @@ class _ProfileState extends State<Profile> {
             statusBarIconBrightness: Brightness.dark,
           ),
           child: Scaffold(
-            backgroundColor: whiteColor,
             body: SafeArea(
               child: Column(
                 children: [
@@ -111,7 +110,7 @@ class _ProfileState extends State<Profile> {
                     child: Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.grey[100],
+                        color: Theme.of(context).colorScheme.surface,
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
@@ -140,19 +139,13 @@ class _ProfileState extends State<Profile> {
                               children: [
                                 Text(
                                   'Logged in as',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.grey[600],
-                                  ),
+                                  style: Theme.of(context).textTheme.bodyMedium
+                                      ?.copyWith(color: Colors.grey[600]),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
                                   userEmail ?? 'No email',
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black87,
-                                  ),
+                                  style: Theme.of(context).textTheme.titleLarge,
                                 ),
                               ],
                             ),
@@ -178,7 +171,8 @@ class _ProfileState extends State<Profile> {
                             return ListView.builder(
                               itemCount: 4,
                               itemBuilder:
-                                  (context, index) => shimmerCampaignCard(),
+                                  (context, index) =>
+                                      shimmerCampaignCard(context),
                             );
                           } else if (state is ProfileDataLoadedState) {
                             final campaigns = state.campaigns;
