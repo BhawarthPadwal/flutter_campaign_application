@@ -269,7 +269,8 @@ class _HomePageState extends State<HomePage> {
                                 },
                               )
                               : state is HomeErrorState
-                              ? Center(child: Text(state.errorMessage))
+                              // ? Center(child: Text("state.error"))
+                              ? Center(child: Text("Network issue kindly check your internet connection"))
                               : Center(child: Text("No campaigns found")),
                     ),
                   ),
