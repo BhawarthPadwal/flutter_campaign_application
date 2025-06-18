@@ -5,6 +5,7 @@ import 'package:campaign_application/models/campaigns_by_userid_model.dart';
 import 'package:meta/meta.dart';
 import 'package:logger/logger.dart';
 
+import '../../../auth_services/auth_service.dart';
 import '../../../models/campaigns_model.dart';
 
 part 'profile_event.dart';
@@ -18,6 +19,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     on<FetchUserCampaignsEvent>(fetchUserCampaignsEvent);
     on<DeleteCampaignEvent>(deleteCampaignEvent);
     on<UpdateCampaignEvent>(updateCampaignEvent);
+    on<LogoutEvent>(logoutEvent);
   }
 
   Future<List<UserCampaign>> fetchAndParseCampaigns(String id) async {
@@ -80,6 +82,15 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       }
     } catch(e) {
       emit(CampaignUpdatedErrorState(e.toString()));
+    }
+  }
+
+  FutureOr<void> logoutEvent(LogoutEvent event, Emitter<ProfileState> emit) {
+    try {
+      AuthService().signOutUser();
+      emit(NavigateToLoginPageState());
+    } catch(e) {
+      emit(LogoutErrorState(e.toString()));
     }
   }
 }

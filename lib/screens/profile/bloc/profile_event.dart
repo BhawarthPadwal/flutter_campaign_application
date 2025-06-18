@@ -34,3 +34,5 @@ final class UpdateCampaignEvent extends ProfileEvent {
   });
 
 }
+
+final class LogoutEvent extends ProfileEvent {}

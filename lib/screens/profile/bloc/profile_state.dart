@@ -36,3 +36,10 @@ final class CampaignUpdatedErrorState extends ProfileActionableState {
 
   CampaignUpdatedErrorState(this.error);
 }
+
+final class NavigateToLoginPageState extends ProfileActionableState {}
+
+final class LogoutErrorState extends ProfileState {
+  final String error;
+  LogoutErrorState(this.error);
+}

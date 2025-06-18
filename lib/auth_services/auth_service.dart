@@ -1,11 +1,17 @@
-import 'package:flutter/cupertino.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:logger/logger.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthService {
+  /// GET CURRENT USER
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  String? get currentUserId => _auth.currentUser?.uid;
+
+  String? get currentUserEmail => _auth.currentUser?.email;
 
   final Logger logger = Logger();
+
   /// SIGN UP WITH EMAIL AND PASSWORD
 
   Future<UserCredential?> signup({
@@ -73,7 +79,8 @@ class AuthService {
       if (googleUser == null) return null;
 
       // Get the authentication details from the request
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
 
       // Create a new credential
       final OAuthCredential credential = GoogleAuthProvider.credential(

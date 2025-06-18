@@ -2,9 +2,9 @@ import 'package:campaign_application/screens/authentication/login_page.dart';
 import 'package:campaign_application/screens/profile/bloc/profile_bloc.dart';
 import 'package:campaign_application/screens/profile/services/profile_services.dart';
 import 'package:campaign_application/screens/shimmer_screens/campaign_card_shimmer.dart';
+import 'package:campaign_application/utilities/utilities.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../auth_services/auth_service.dart';
 import '../../themes/theme.dart';
@@ -20,12 +20,26 @@ class Profile extends StatefulWidget {
 
 class _ProfileState extends State<Profile> {
   ProfileBloc profileBloc = ProfileBloc();
+  String? userId;
+  String? userEmail;
 
   @override
   void initState() {
     super.initState();
-    final userId = FirebaseAuth.instance.currentUser!.uid;
-    profileBloc.add(FetchUserCampaignsEvent(userId));
+    final authService = AuthService();
+    userId = authService.currentUserId;
+    userEmail = authService.currentUserEmail;
+    if (userId != null) {
+      profileBloc.add(FetchUserCampaignsEvent(userId!));
+    } else {
+      debugPrint('No user logged in. Skipping fetch.');
+    }
+  }
+
+  @override
+  void dispose() {
+    profileBloc.close();
+    super.dispose();
   }
 
   @override
@@ -36,29 +50,21 @@ class _ProfileState extends State<Profile> {
       buildWhen: (previous, current) => current is! ProfileActionableState,
       listener: (context, state) {
         if (state is CampaignDeletedSuccessState) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Campaign deleted successfully'),
-            ),
-          );
+          showSnackbar(context, message: 'Campaign deleted successfully');
         } else if (state is CampaignDeletedErrorState) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.error),
-            ),
-          );
+          showSnackbar(context, message: state.error);
         } else if (state is CampaignUpdatedSuccessState) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Campaign updated successfully'),
-            ),
-          );
+          showSnackbar(context, message: 'Campaign updated successfully');
         } else if (state is CampaignUpdatedErrorState) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.error),
-            ),
+          showSnackbar(context, message: state.error);
+        } else if (state is NavigateToLoginPageState) {
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            LoginPage.rootName,
+            (route) => false,
           );
+        } else if (state is LogoutErrorState) {
+          showSnackbar(context, message: state.error);
         }
       },
       builder: (context, state) {
@@ -90,12 +96,7 @@ class _ProfileState extends State<Profile> {
                         Spacer(),
                         IconButton(
                           onPressed: () {
-                            AuthService().signOutUser();
-                            Navigator.pushNamedAndRemoveUntil(
-                              context,
-                              LoginPage.rootName,
-                              (route) => false,
-                            );
+                            profileBloc.add(LogoutEvent());
                           },
                           icon: Icon(Icons.logout),
                         ),
@@ -146,8 +147,7 @@ class _ProfileState extends State<Profile> {
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  FirebaseAuth.instance.currentUser!.email ??
-                                      'No email',
+                                  userEmail ?? 'No email',
                                   style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
@@ -175,7 +175,11 @@ class _ProfileState extends State<Profile> {
                       child: Builder(
                         builder: (_) {
                           if (state is ProfileDataLoadingState) {
-                            return ListView.builder(itemCount: 4,itemBuilder: (context, index) => shimmerCampaignCard());
+                            return ListView.builder(
+                              itemCount: 4,
+                              itemBuilder:
+                                  (context, index) => shimmerCampaignCard(),
+                            );
                           } else if (state is ProfileDataLoadedState) {
                             final campaigns = state.campaigns;
                             if (campaigns.isEmpty) {
@@ -190,14 +194,21 @@ class _ProfileState extends State<Profile> {
                                 final campaign = campaigns[index];
                                 return GestureDetector(
                                   onTap: () {
-                                    showCampaignBottomSheet(context: context, campaign: campaign, profileBloc: profileBloc);
+                                    showCampaignBottomSheet(
+                                      context: context,
+                                      campaign: campaign,
+                                      profileBloc: profileBloc,
+                                    );
                                   },
-                                  child: userCampaignCard(context, campaign, profileBloc),
+                                  child: userCampaignCard(
+                                    context,
+                                    campaign,
+                                    profileBloc,
+                                  ),
                                 );
                               },
                             );
                           } else if (state is ProfileDataErrorState) {
-                            //return Center(child: Text(state.error));
                             return Center(child: Text("No campaigns found"));
                           } else {
                             return const Center(

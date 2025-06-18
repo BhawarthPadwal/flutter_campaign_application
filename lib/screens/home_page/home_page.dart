@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:campaign_application/auth_services/auth_service.dart';
 import 'package:campaign_application/screens/home_page/bloc/home_bloc.dart';
 import 'package:campaign_application/screens/home_page/services/home_services.dart';
 import 'package:campaign_application/screens/profile/profile.dart';
@@ -7,7 +8,6 @@ import 'package:campaign_application/screens/shimmer_screens/campaign_card_shimm
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../../themes/theme.dart';
 import '../home_page/widget/campaign_dialog.dart';
 
@@ -26,10 +26,13 @@ class _HomePageState extends State<HomePage> {
   late ScrollController _scrollController;
   bool _isFetchingMore = false;
   Timer? _debounce;
+  String? userId;
 
   @override
   void initState() {
     super.initState();
+    final authService = AuthService();
+    userId = authService.currentUserId;
     homeBloc.add(FetchCampaignsEvent());
 
     _scrollController = ScrollController();
@@ -39,6 +42,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void dispose() {
     _scrollController.dispose();
+    homeBloc.close();
     super.dispose();
   }
 
@@ -51,13 +55,14 @@ class _HomePageState extends State<HomePage> {
 
   void _onScroll() {
     if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 200 &&
+            _scrollController.position.maxScrollExtent - 200 &&
         !_isFetchingMore &&
         homeBloc.state is HomeDataLoadedState) {
       final currentState = homeBloc.state as HomeDataLoadedState;
       final nextPage = currentState.currentPage + 1;
 
-      if (nextPage <= currentState.totalPages) { /// Check if there are more pages to fetch
+      if (nextPage <= currentState.totalPages) {
+        /// Check if there are more pages to fetch
         _isFetchingMore = true;
         homeBloc.add(FetchNextPageEvent(nextPage));
       }
@@ -93,11 +98,7 @@ class _HomePageState extends State<HomePage> {
               onPressed: () {
                 showDialog(
                   context: context,
-                  builder:
-                      (_) => CampaignDialog(
-                        homeBloc,
-                        FirebaseAuth.instance.currentUser!.uid,
-                      ),
+                  builder: (_) => CampaignDialog(homeBloc, userId ?? ''),
                 );
               },
               backgroundColor: blueGreyColor,
@@ -212,11 +213,16 @@ class _HomePageState extends State<HomePage> {
                       ),
                       child:
                           state is HomeLoadingState
-                              ? ListView.builder(itemCount: 6, itemBuilder: (context, index) => shimmerCampaignCard())
+                              ? ListView.builder(
+                                itemCount: 6,
+                                itemBuilder:
+                                    (context, index) => shimmerCampaignCard(),
+                              )
                               : state is HomeDataLoadedState
                               ? Builder(
                                 builder: (_) {
-                                  if (state.isPagination) { /// Reset pagination flag when data is loaded via pagination
+                                  if (state.isPagination) {
+                                    /// Reset pagination flag when data is loaded via pagination
                                     _isFetchingMore = false;
                                   }
                                   return state.campaigns.isEmpty
@@ -238,9 +244,14 @@ class _HomePageState extends State<HomePage> {
                                                 state.campaigns.length) {
                                               final campaign =
                                                   state.campaigns[index];
-                                              return campaignCard(context, campaign, homeBloc);
+                                              return campaignCard(
+                                                context,
+                                                campaign,
+                                                homeBloc,
+                                              );
                                             } else {
-                                              return state.currentPage < state.totalPages
+                                              return state.currentPage <
+                                                      state.totalPages
                                                   ? Padding(
                                                     padding:
                                                         const EdgeInsets.all(
@@ -248,7 +259,11 @@ class _HomePageState extends State<HomePage> {
                                                         ),
                                                     child: Center(
                                                       child:
-                                                          CircularProgressIndicator(color: Colors.grey[300]),
+                                                          CircularProgressIndicator(
+                                                            color:
+                                                                Colors
+                                                                    .grey[300],
+                                                          ),
                                                     ),
                                                   )
                                                   : SizedBox.shrink();
